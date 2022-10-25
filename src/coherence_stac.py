@@ -12,10 +12,10 @@ Design:
 [x] connect to aws open bucket containing coherence data
 [x] ls the prefixes we're interested in
 [x] parse names (N00E014_007D_inc.tif) -> bbox, season, polarization, dataset
-[ ] create base sentinel-1 stac item using https://github.com/stac-extensions/sar
-[ ] add coherence metadata to base
-[ ] add to catalog
-[ ] save catalog locally
+[x] create base sentinel-1 stac item using https://github.com/stac-extensions/sar
+[x] add coherence metadata to base
+[x] add to catalog
+[x] save catalog locally
 
 structure:
     item (tile + season)
