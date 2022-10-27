@@ -137,7 +137,6 @@ def create_stac_item(yearly_assets, seasonal_assets):
         properties=properties,
     )
 
-    # TODO don't know if look properties are correct
     ext_sar = sar.SarExtension.ext(item, add_if_missing=True)
     ext_sar.apply(
         'IW',
@@ -145,8 +144,8 @@ def create_stac_item(yearly_assets, seasonal_assets):
         [sar.Polarization('VV'), sar.Polarization('VH')],
         'COH',
         SENTINEL1_CENTER_FREQUENCY,
-        looks_range=7,
-        looks_azimuth=12,
+        looks_range=12,
+        looks_azimuth=3,
         observation_direction=sar.ObservationDirection('right'),
     )
 
@@ -231,7 +230,6 @@ def save_stac_catalog_s3(catalog, s3_client, bucket, key):
 
 
 def parse_france_list(data_path):
-    breakpoint()
     with open(data_path, 'r') as f:
         urls = [x.strip() for x in f.readlines()]
     tileids = [parse_url(x)['tileid'] for x in urls]
