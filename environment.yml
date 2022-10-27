@@ -8,6 +8,9 @@ dependencies:
   - botocore
   - python
   - pip
+  - pystac
+  - shapely
+  - tqdm
   # For packaging, and testing
   - flake8
   - flake8-import-order
@@ -16,6 +19,3 @@ dependencies:
   - pytest
   - pytest-console-scripts
   - pytest-cov
-  # For running
-  - pystac
-  - shapely

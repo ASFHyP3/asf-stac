@@ -35,6 +35,34 @@ SEASONS = {
     'SUMMER': (datetime(2020, 6, 1), datetime(2020, 8, 31)),
     'FALL': (datetime(2020, 9, 1), datetime(2020, 11, 30)),
 }
+LICENSE = 'Creative Commons Attribution 4.0 International Public License'
+
+DATA_CITATION = (
+    'Kellndorfer, J. , O. Cartus, M. Lavalle,  C. Magnard, P. Milillo, S. Oveisgharan, B. Osmanoglu, '
+    'P. Rosen, and U. Wegmuller. 2022. Global seasonal Sentinel-1 interferometric coherence and backscatter data set. '
+    '[Indicate subset used]. Fairbanks, Alaska USA. NASA Alaska Satellite Facility Synthetic Aperture Radar '
+    'Distributed Active Archive Center. doi: https://doi.org/10.5067/8W33RRS6S2RV. [Date Accessed].'
+)
+
+LITERATURE_CITATION = (
+    'Kellndorfer, J. , O. Cartus, M. Lavalle,  C. Magnard, P. Milillo, S. Oveisgharan, B. '
+    'Osmanoglu, P. Rosen, and U. Wegmuller. 2022. Global seasonal Sentinel-1 interferometric coherence and '
+    'backscatter data set., Scientific Data. https://doi.org/10.1038/s41597-022-01189-6'
+)
+
+DESCRIPTION = (
+    'This data set is the first-of-its-kind spatial representation of multi-seasonal, global C-band '
+    'Synthetic Aperture Radar (SAR) interferometric repeat-pass coherence and backscatter signatures. Coverage '
+    'comprises land masses and ice sheets from 82° Northern to 79° Southern latitudes. The data set is derived from '
+    'multi-temporal repeat-pass interferometric processing of about 205,000 Sentinel-1 C-band SAR images acquired in '
+    'Interferometric Wide-Swath Mode from 1-Dec-2019 to 30-Nov-2020. The data set encompasses three sets of seasonal '
+    '(December-February, March-May, June-August, September-November) metrics produced with a pixel spacing of three '
+    'arcseconds: 1) Median 6-, 12-, 18-, 24-, 36-, and 48-days repeat-pass coherence at VV or HH polarizations, 2) '
+    'Mean radiometrically terrain corrected backscatter (γ0) at VV and VH, or HH and HV polarizations, and 3) '
+    'Estimated parameters of an exponential coherence decay model. The data set has been produced to obtain global, '
+    'spatially detailed information on how decorrelation affects interferometric measurements of surface displacement '
+    'and is rich in spatial and temporal information for a variety of mapping applications.'
+)
 
 
 def construct_url(s3_client, bucket, key):
@@ -171,13 +199,12 @@ def create_tile_stac_collection(
 
 
 def create_stac_catalog():
-    # extension_list = [x.to_dict()['stac_extensions'] for x in items]
-    # extensions = list(set([num for sublist in extension_list for num in sublist]))
+    extra_fields = {'License': LICENSE, 'Data Citation': DATA_CITATION, 'Literature Citation': LITERATURE_CITATION}
     catalog = pystac.Catalog(
         id='sentinel-1-global-coherence-earthbigdata',
-        description='A catalog containing the Earthbigdata Sentinel-1 Global Coherence Dataset',
+        description=DESCRIPTION,
         catalog_type=pystac.CatalogType.RELATIVE_PUBLISHED,
-        # stac_extensions=extensions,
+        extra_fields=extra_fields,
     )
     return catalog
 
@@ -196,16 +223,25 @@ def save_stac_catalog_s3(catalog, s3_client, bucket, key):
     catalog_name = base_url.name
     catalog.normalize_hrefs(str(base_url))
     catalog.save(dest_href=catalog_name)
-    # jsons = [x for x in Path(catalog_name).glob('**/*json')]
-    # print('uploading...')
-    # for json in tqdm(jsons):
-    #     s3_client.upload_file(str(json), bucket, str(Path(key).parent / json))
+    jsons = [x for x in Path(catalog_name).glob('**/*json')]
+    print('uploading...')
+    for json in tqdm(jsons):
+        s3_client.upload_file(str(json), bucket, str(Path(key).parent / json))
     return f'{catalog_name}/catalog.json'
+
+
+def parse_france_list(data_path):
+    breakpoint()
+    with open(data_path, 'r') as f:
+        urls = [x.strip() for x in f.readlines()]
+    tileids = [parse_url(x)['tileid'] for x in urls]
+    return list(set(tileids))
 
 
 if __name__ == '__main__':
     bucket = 'sentinel-1-global-coherence-earthbigdata'
-    tiles = ['N48W005', 'N49W005']
+    # tiles = ['N48W005', 'N49W005']
+    tiles = parse_france_list('data/france_urls.txt')
     s3 = boto3.client('s3')
 
     catalog = create_stac_catalog()
