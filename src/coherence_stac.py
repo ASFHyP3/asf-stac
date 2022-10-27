@@ -1,4 +1,6 @@
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
+from itertools import repeat
 from pathlib import Path
 
 import boto3
@@ -240,13 +242,25 @@ if __name__ == '__main__':
     bucket = 'sentinel-1-global-coherence-earthbigdata'
     # tiles = ['N48W005', 'N49W005']
     tiles = parse_france_list('data/france_urls.txt')
+    prefixes = [f'data/tiles/{x}/' for x in tiles]
     s3 = boto3.client('s3')
 
+    # Multi-thread
+    print('creating...')
+    with ThreadPoolExecutor(max_workers=20) as executor:
+        results = list(
+            tqdm(executor.map(create_tile_stac_collection, repeat(s3), repeat(bucket), prefixes), total=len(prefixes))
+        )
     catalog = create_stac_catalog()
-    for tile in tiles:
-        prefix = f'data/tiles/{tile}/'
-        collection = create_tile_stac_collection(s3, bucket, prefix)
+    for collection in results:
         catalog.add_child(collection)
+
+    # # Single Thread
+    # catalog = create_stac_catalog()
+    # for tile in tiles:
+    #     prefix = f'data/tiles/{tile}/'
+    #     collection = create_tile_stac_collection(s3, bucket, prefix)
+    #     catalog.add_child(collection)
 
     upload_bucket = 'ffwilliams2-shenanigans'
     upload_key = 'stac/coherence_stac'
