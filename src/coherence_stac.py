@@ -5,6 +5,7 @@ import boto3
 import pystac
 from pystac.extensions import sar
 from shapely import geometry
+from tqdm import tqdm
 
 '''
 Design:
@@ -29,24 +30,24 @@ structure:
 
 SENTINEL1_CENTER_FREQUENCY = 5.405
 SEASONS = {
-    'winter': (datetime(2019, 12, 1), datetime(2020, 2, 28)),
-    'spring': (datetime(2020, 3, 1), datetime(2020, 5, 31)),
-    'summer': (datetime(2020, 6, 1), datetime(2020, 8, 31)),
-    'fall': (datetime(2020, 9, 1), datetime(2020, 11, 30)),
+    'WINTER': (datetime(2019, 12, 1), datetime(2020, 2, 28)),
+    'SPRING': (datetime(2020, 3, 1), datetime(2020, 5, 31)),
+    'SUMMER': (datetime(2020, 6, 1), datetime(2020, 8, 31)),
+    'FALL': (datetime(2020, 9, 1), datetime(2020, 11, 30)),
 }
 
 
-def construct_urls(s3_client, bucket, keys):
+def construct_url(s3_client, bucket, key):
     location = s3_client.get_bucket_location(Bucket=bucket)['LocationConstraint']
-    urls = [f'https://{bucket}.s3.{location}.amazonaws.com/{k}' for k in keys]
-    return urls
+    url = f'https://{bucket}.s3.{location}.amazonaws.com/{key}'
+    return url
 
 
 def get_object_urls(s3_client, bucket, prefix, requester_pays=False):
     kwargs = {'RequestPayer': 'requester'} if requester_pays else {}
     response = s3_client.list_objects_v2(Bucket=bucket, Prefix=prefix, **kwargs)
     keys = [x['Key'] for x in response['Contents']]
-    urls = construct_urls(s3_client, bucket, keys)
+    urls = [construct_url(s3_client, bucket, x) for x in keys]
     return urls
 
 
@@ -66,11 +67,11 @@ def tileid_to_bbox(tileid):
 
 
 def parse_url(url):
-    parts = Path(url).stem.split('_')
+    parts = Path(url.upper()).stem.split('_')
     if len(parts) == 3:
         tileid, orbit, product = parts
         bbox = tileid_to_bbox(tileid)
-        metadata = {'url': url, 'bbox': bbox, tileid: tileid, 'product': product}
+        metadata = {'url': url, 'bbox': bbox, 'tileid': tileid, 'product': product}
         return metadata
 
     tileid, season, polarization, product = parts
@@ -91,13 +92,20 @@ def parse_url(url):
 def create_stac_item(yearly_assets, seasonal_assets):
     ex_asset = seasonal_assets[0]
     item_id = f'{ex_asset["tileid"]}_{ex_asset["season"]}'
-    properties = {'tileid': ex_asset['tileid'], 'season': ex_asset['season']}
-
+    start_date = ex_asset['date_range'][0]
+    end_date = ex_asset['date_range'][1]
+    mid_date = start_date + (end_date - start_date) / 2
+    properties = {
+        'tileid': ex_asset['tileid'],
+        'season': ex_asset['season'],
+        'start_datetime': start_date.isoformat(),
+        'end_datetime': end_date.isoformat(),
+    }
     item = pystac.Item(
         id=item_id,
         geometry=geometry.mapping(ex_asset['bbox']),
         bbox=ex_asset['bbox'].bounds,
-        datetime=ex_asset['date_range'][0],
+        datetime=mid_date,
         properties=properties,
     )
 
@@ -125,7 +133,7 @@ def create_stac_item(yearly_assets, seasonal_assets):
         asset_properties = {'polarization': asset['polarization']}
         if 'COH' in asset['product']:
             asset_properties['product'] = 'COH'
-            asset_properties['temporal_separation'] = f'{asset["product"][-2:]} days'
+            asset_properties['temporal_separation'] = f'{int(asset["product"][-2:])} days'
         else:
             asset_properties['product'] = asset['product']
 
@@ -136,16 +144,41 @@ def create_stac_item(yearly_assets, seasonal_assets):
     return item
 
 
-def create_stac_catalog(items):
-    extension_list = [x.to_dict()['stac_extensions'] for x in items]
-    extensions = list(set([num for sublist in extension_list for num in sublist]))
+def create_tile_stac_collection(
+    s3_client, bucket, prefix, date_interval=(datetime(2019, 12, 1), datetime(2020, 11, 30))
+):
+    urls = get_object_urls(s3_client, bucket, prefix, requester_pays=True)
+    asset_dicts = [parse_url(x) for x in urls]
+    items = []
+
+    yearly_assets = [x for x in asset_dicts if ('inc' in x['url']) or ('lsmap' in x['url'])]
+    for season in ('spring', 'summer', 'fall', 'winter'):
+        seasonal_assets = [x for x in asset_dicts if season in x['url']]
+        item = create_stac_item(yearly_assets, seasonal_assets)
+        items.append(item)
+
+    tileid = asset_dicts[0]['tileid']
+    spatial_extent = pystac.SpatialExtent(items[0].bbox)
+    temporal_extent = pystac.TemporalExtent(intervals=[date_interval])
+    collection_extent = pystac.Extent(spatial=spatial_extent, temporal=temporal_extent)
+    collection = pystac.Collection(
+        id=tileid,
+        description=f'Sentinel-1 Coherence Tile {tileid}',
+        extent=collection_extent,
+    )
+    collection.add_items(items)
+    return collection
+
+
+def create_stac_catalog():
+    # extension_list = [x.to_dict()['stac_extensions'] for x in items]
+    # extensions = list(set([num for sublist in extension_list for num in sublist]))
     catalog = pystac.Catalog(
         id='sentinel-1-global-coherence-earthbigdata',
         description='A catalog containing the Earthbigdata Sentinel-1 Global Coherence Dataset',
-        catalog_type=pystac.CatalogType.ABSOLUTE_PUBLISHED,
-        stac_extensions=extensions
+        catalog_type=pystac.CatalogType.RELATIVE_PUBLISHED,
+        # stac_extensions=extensions,
     )
-    catalog.add_items(items)
     return catalog
 
 
@@ -158,20 +191,29 @@ def save_stac_catalog_locally(catalog, catalog_name: str):
     return catalog_name / 'catalog.json'
 
 
+def save_stac_catalog_s3(catalog, s3_client, bucket, key):
+    base_url = Path(construct_url(s3_client, bucket, key))
+    catalog_name = base_url.name
+    catalog.normalize_hrefs(str(base_url))
+    catalog.save(dest_href=catalog_name)
+    # jsons = [x for x in Path(catalog_name).glob('**/*json')]
+    # print('uploading...')
+    # for json in tqdm(jsons):
+    #     s3_client.upload_file(str(json), bucket, str(Path(key).parent / json))
+    return f'{catalog_name}/catalog.json'
+
+
 if __name__ == '__main__':
     bucket = 'sentinel-1-global-coherence-earthbigdata'
-    prefix = 'data/tiles/N48W005/'
+    tiles = ['N48W005', 'N49W005']
     s3 = boto3.client('s3')
 
-    urls = get_object_urls(s3, bucket, prefix, requester_pays=True)
-    asset_dicts = [parse_url(x) for x in urls]
-    items = []
+    catalog = create_stac_catalog()
+    for tile in tiles:
+        prefix = f'data/tiles/{tile}/'
+        collection = create_tile_stac_collection(s3, bucket, prefix)
+        catalog.add_child(collection)
 
-    yearly_assets = [x for x in asset_dicts if ('inc' in x['url']) or ('lsmap' in x['url'])]
-    for season in ('spring', 'summer', 'fall', 'winter'):
-        seasonal_assets = [x for x in asset_dicts if season in x['url']]
-        item = create_stac_item(yearly_assets, seasonal_assets)
-        items.append(item)
-
-    catalog = create_stac_catalog(items)
-    save_stac_catalog_locally(catalog, 'coherence_catalog')
+    upload_bucket = 'ffwilliams2-shenanigans'
+    upload_key = 'stac/coherence_stac'
+    save_stac_catalog_s3(catalog, s3, upload_bucket, upload_key)
