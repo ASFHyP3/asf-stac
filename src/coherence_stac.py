@@ -224,11 +224,7 @@ def save_stac_catalog_s3(catalog, s3_client, bucket, key):
     catalog_name = base_url.name
     catalog.normalize_hrefs(str(base_url))
     catalog.save(dest_href=catalog_name)
-    jsons = [x for x in Path(catalog_name).glob('**/*json')]
-    print('uploading...')
-    for json in tqdm(jsons):
-        s3_client.upload_file(str(json), bucket, str(Path(key).parent / json))
-    return f'{catalog_name}/catalog.json'
+    return catalog_name
 
 
 def parse_france_list(data_path):
@@ -240,6 +236,8 @@ def parse_france_list(data_path):
 
 if __name__ == '__main__':
     bucket = 'sentinel-1-global-coherence-earthbigdata'
+    upload_bucket = 'ffwilliams2-shenanigans'
+    upload_key = 'stac/coherence_stac'
     # tiles = ['N48W005', 'N49W005']
     tiles = parse_france_list('data/france_urls.txt')
     prefixes = [f'data/tiles/{x}/' for x in tiles]
@@ -255,13 +253,9 @@ if __name__ == '__main__':
     for collection in results:
         catalog.add_child(collection)
 
-    # # Single Thread
-    # catalog = create_stac_catalog()
-    # for tile in tiles:
-    #     prefix = f'data/tiles/{tile}/'
-    #     collection = create_tile_stac_collection(s3, bucket, prefix)
-    #     catalog.add_child(collection)
-
-    upload_bucket = 'ffwilliams2-shenanigans'
-    upload_key = 'stac/coherence_stac'
-    save_stac_catalog_s3(catalog, s3, upload_bucket, upload_key)
+    catalog_name = save_stac_catalog_s3(catalog, s3, upload_bucket, upload_key)
+    jsons = [str(x) for x in Path(catalog_name).glob('**/*json')]
+    json_keys = [str(Path(upload_key).parent / x) for x in jsons]
+    print('uploading...')
+    with ThreadPoolExecutor(max_workers=20) as executor:
+        _ = list(tqdm(executor.map(s3.upload_file, jsons, repeat(upload_bucket), json_keys), total=len(jsons)))
