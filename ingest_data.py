@@ -31,7 +31,6 @@ def traverse(stac_object_path: Path, api_url: str) -> None:
 
 
 def get_child_paths(stac_object: dict, parent_path: Path) -> list[Path]:
-    # Assumes relative links.
     return [
         parent_path / link_object['href']
         for link_object in stac_object['links'] if link_object['rel'] in ('child', 'item')
