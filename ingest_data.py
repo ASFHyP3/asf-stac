@@ -38,7 +38,7 @@ def get_child_paths(stac_object: dict, parent_path: Path) -> list[Path]:
 
 
 def add_stac_object(stac_object: dict, api_url: str) -> None:
-    if stac_object['type'] in ('Catalog', 'Collection'):  # TODO: is there a separate POST /catalogs endpoint?
+    if stac_object['type'] in ('Catalog', 'Collection'):
         endpoint = '/collections'
     else:
         assert stac_object['type'] == 'Feature'
