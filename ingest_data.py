@@ -1,3 +1,16 @@
+"""
+Adds a STAC dataset to a STAC API application.
+
+Assumes that the dataset is arranged as a tree (connected acyclic
+graph). This means that all objects should be reachable from the root
+object and there should be no cycles.
+
+Assumes that links to child objects are specified as relative
+filesystem paths.
+
+Assumes that the STAC API supports the Transaction extension.
+"""
+
 import argparse
 import json
 from pathlib import Path
@@ -37,15 +50,15 @@ def add_stac_object(stac_object: dict, api_url: str) -> None:
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description='Add STAC catalog data to a STAC API application.')
-    parser.add_argument('catalog_path')
-    parser.add_argument('api_url')
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument('root_object_path', help='Filesystem path to the root STAC object.')
+    parser.add_argument('api_url', help='URL for the STAC API.')
     return parser.parse_args()
 
 
 def main() -> None:
     args = parse_args()
-    traverse(Path(args.catalog_path), args.api_url)
+    traverse(Path(args.root_object_path), args.api_url)
 
 
 if __name__ == '__main__':
