@@ -9,6 +9,7 @@ dependencies:
   - python
   - pip
   - pystac
+  - requests
   - shapely
   - tqdm
   # For packaging, and testing
