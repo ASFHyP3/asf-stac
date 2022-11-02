@@ -1,0 +1,10 @@
+Resources:
+  Cluster:
+    Type: AWS::ECS::Cluster
+
+  TaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      ContainerDefinitions:
+        - Name: stac-fastapi
+          Image: '' # TODO
