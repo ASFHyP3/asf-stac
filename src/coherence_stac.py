@@ -234,14 +234,35 @@ def parse_france_list(data_path):
     return list(set(tileids))
 
 
+def get_all_prefixes(s3_client, bucket, prefix, requester_pays=False):
+    kwargs = {'RequestPayer': 'requester'} if requester_pays else {}
+    kwargs['Bucket'] = bucket
+    kwargs['Prefix'] = prefix
+    paginator = s3.get_paginator('list_objects_v2')
+    page_iterator = paginator.paginate(**kwargs)
+    prefix_lists = []
+    for page in page_iterator:
+        keys = [x['Key'] for x in page['Contents']]
+        page_prefixes = [x.split('/')[2] for x in keys if 'vrt' not in x]
+        page_prefixes = list(set(page_prefixes))
+        prefix_lists.append(page_prefixes)
+
+    prefixes = [item for sublist in prefix_lists for item in sublist]
+    prefixes = list(set(prefixes))
+    return prefixes
+
+
 if __name__ == '__main__':
     bucket = 'sentinel-1-global-coherence-earthbigdata'
     upload_bucket = 'ffwilliams2-shenanigans'
     upload_key = 'stac/coherence_stac'
+
     # tiles = ['N48W005', 'N49W005']
-    tiles = parse_france_list('data/france_urls.txt')
-    prefixes = [f'data/tiles/{x}/' for x in tiles]
+    # tiles = parse_france_list('data/france_urls.txt')
+    # prefixes = [f'data/tiles/{x}/' for x in tiles]
+
     s3 = boto3.client('s3')
+    prefixes = get_all_prefixes(s3, bucket, 'data/tiles/')
 
     # Multi-thread
     print('creating...')
@@ -254,8 +275,9 @@ if __name__ == '__main__':
         catalog.add_child(collection)
 
     catalog_name = save_stac_catalog_s3(catalog, s3, upload_bucket, upload_key)
-    jsons = [str(x) for x in Path(catalog_name).glob('**/*json')]
-    json_keys = [str(Path(upload_key).parent / x) for x in jsons]
-    print('uploading...')
-    with ThreadPoolExecutor(max_workers=20) as executor:
-        _ = list(tqdm(executor.map(s3.upload_file, jsons, repeat(upload_bucket), json_keys), total=len(jsons)))
+
+    # jsons = [str(x) for x in Path(catalog_name).glob('**/*json')]
+    # json_keys = [str(Path(upload_key).parent / x) for x in jsons]
+    # print('uploading...')
+    # with ThreadPoolExecutor(max_workers=20) as executor:
+    #     _ = list(tqdm(executor.map(s3.upload_file, jsons, repeat(upload_bucket), json_keys), total=len(jsons)))
