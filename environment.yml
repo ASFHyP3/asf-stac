@@ -6,6 +6,7 @@ channels:
 dependencies:
   - boto3
   - botocore
+  - cfn-lint
   - python
   - pip
   - pystac
