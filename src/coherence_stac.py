@@ -125,6 +125,7 @@ def create_stac_item(yearly_assets, seasonal_assets):
     start_date = ex_asset['date_range'][0]
     end_date = ex_asset['date_range'][1]
     mid_date = start_date + (end_date - start_date) / 2
+    polarizations = list(set([x['polarization'].upper() for x in seasonal_assets]))
     properties = {
         'tileid': ex_asset['tileid'],
         'season': ex_asset['season'],
@@ -143,7 +144,7 @@ def create_stac_item(yearly_assets, seasonal_assets):
     ext_sar.apply(
         'IW',
         sar.FrequencyBand('C'),
-        [sar.Polarization('VV'), sar.Polarization('VH')],
+        [sar.Polarization(x) for x in polarizations],
         'COH',
         SENTINEL1_CENTER_FREQUENCY,
         looks_range=12,
@@ -181,8 +182,10 @@ def create_tile_stac_collection(
     items = []
 
     yearly_assets = [x for x in asset_dicts if ('inc' in x['url']) or ('lsmap' in x['url'])]
-    for season in ('spring', 'summer', 'fall', 'winter'):
-        seasonal_assets = [x for x in asset_dicts if season in x['url']]
+    seasons = [x['season'] for x in asset_dicts if not (('inc' in x['url']) or ('lsmap' in x['url']))]
+    seasons = list(set(seasons))
+    for season in seasons:
+        seasonal_assets = [x for x in asset_dicts if season.lower() in x['url']]
         item = create_stac_item(yearly_assets, seasonal_assets)
         items.append(item)
 
@@ -196,6 +199,14 @@ def create_tile_stac_collection(
         extent=collection_extent,
     )
     collection.add_items(items)
+    return collection
+
+
+def safe_create_tile_stac_collection(s3_client, bucket, prefix):
+    try:
+        collection = create_tile_stac_collection(s3_client, bucket, prefix)
+    except:
+        collection = prefix
     return collection
 
 
@@ -234,7 +245,7 @@ def parse_france_list(data_path):
     return list(set(tileids))
 
 
-def get_all_prefixes(s3_client, bucket, prefix, requester_pays=False):
+def get_all_tiles(s3_client, bucket, prefix, requester_pays=False):
     kwargs = {'RequestPayer': 'requester'} if requester_pays else {}
     kwargs['Bucket'] = bucket
     kwargs['Prefix'] = prefix
@@ -243,12 +254,14 @@ def get_all_prefixes(s3_client, bucket, prefix, requester_pays=False):
     prefix_lists = []
     for page in page_iterator:
         keys = [x['Key'] for x in page['Contents']]
-        page_prefixes = [x.split('/')[2] for x in keys if 'vrt' not in x]
+        page_prefixes = [x.split('/')[2] for x in keys if '.' not in x.split('/')[2]]
         page_prefixes = list(set(page_prefixes))
         prefix_lists.append(page_prefixes)
 
     prefixes = [item for sublist in prefix_lists for item in sublist]
     prefixes = list(set(prefixes))
+    with open('prefixes.txt', 'w') as f:
+        f.writelines([x+'\n' for x in prefixes])
     return prefixes
 
 
@@ -257,27 +270,36 @@ if __name__ == '__main__':
     upload_bucket = 'ffwilliams2-shenanigans'
     upload_key = 'stac/coherence_stac'
 
-    # tiles = ['N48W005', 'N49W005']
     # tiles = parse_france_list('data/france_urls.txt')
     # prefixes = [f'data/tiles/{x}/' for x in tiles]
 
     s3 = boto3.client('s3')
-    prefixes = get_all_prefixes(s3, bucket, 'data/tiles/')
+    # tiles = get_all_tiles(s3, bucket, 'data/tiles/')
+    with open('data/prefixes.txt', 'r') as f:
+        tiles = [x.strip() for x in f.readlines()]
+    prefixes = [f'data/tiles/{x}/' for x in tiles][0:50]
+
+    # for p in prefixes:
+    #     x = create_tile_stac_collection(s3, bucket, p)
 
     # Multi-thread
-    print('creating...')
+    print('creating items...')
     with ThreadPoolExecutor(max_workers=20) as executor:
         results = list(
-            tqdm(executor.map(create_tile_stac_collection, repeat(s3), repeat(bucket), prefixes), total=len(prefixes))
+            tqdm(executor.map(safe_create_tile_stac_collection, repeat(s3), repeat(bucket), prefixes), total=len(prefixes))
         )
+    
+    print('creating catalog...')
+    invalid_tiles = []
     catalog = create_stac_catalog()
-    for collection in results:
-        catalog.add_child(collection)
+    for result in results:
+        if isinstance(result, pystac.collection.Collection):
+            catalog.add_child(result)
+        else:
+            invalid_tiles.append(result)
 
-    catalog_name = save_stac_catalog_s3(catalog, s3, upload_bucket, upload_key)
 
-    # jsons = [str(x) for x in Path(catalog_name).glob('**/*json')]
-    # json_keys = [str(Path(upload_key).parent / x) for x in jsons]
-    # print('uploading...')
-    # with ThreadPoolExecutor(max_workers=20) as executor:
-    #     _ = list(tqdm(executor.map(s3.upload_file, jsons, repeat(upload_bucket), json_keys), total=len(jsons)))
+    print('saving catalog...')
+    catalog_name = save_stac_catalog_locally(catalog, 'coherence_stac')
+    with open('data/invalid_tiles.txt', 'w') as f:
+        f.writelines([x+'\n' for x in invalid_tiles])
