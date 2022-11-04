@@ -1,1 +1,9 @@
+# TODO pin versions
+boto3
+cfn-lint
 pypgstac[psycopg]
+pystac
+requests
+shapely
+tqdm
+flake8
