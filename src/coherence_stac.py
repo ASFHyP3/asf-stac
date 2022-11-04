@@ -277,10 +277,7 @@ if __name__ == '__main__':
     # tiles = get_all_tiles(s3, bucket, 'data/tiles/')
     with open('data/prefixes.txt', 'r') as f:
         tiles = [x.strip() for x in f.readlines()]
-    prefixes = [f'data/tiles/{x}/' for x in tiles][0:50]
-
-    # for p in prefixes:
-    #     x = create_tile_stac_collection(s3, bucket, p)
+    prefixes = [f'data/tiles/{x}/' for x in tiles]
 
     # Multi-thread
     print('creating items...')
