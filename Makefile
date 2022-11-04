@@ -1,4 +1,5 @@
-# TODO create target for installing dependencies
+install:
+	python -m pip install -r requirements.txt
 
 template_path ?= '' # TODO
 s3_bucket ?= '' # TODO
@@ -12,7 +13,18 @@ deploy:
 	&& aws cloudformation deploy \
 	    --template-file packaged.yml \
 	    --stack-name ${stack_name} \
-	    --capabilities CAPABILITY_NAMED_IAM
+	    --capabilities CAPABILITY_NAMED_IAM \
+	    --parameter-overrides \
+	      AsfNetworkCidr=${ASF_NETWORK_CIDR} \
+	      DatabasePassword=${DATABASE_PASSWORD}
+
+db_host ?= 'host'
+db_password ?= 'password'
+psql:
+	PGHOST=${db_host} PGPORT=5432 PGDATABASE=postgres PGUSER=postgres PGPASSWORD=${db_password} psql
+
+migrate:
+	PGHOST=${db_host} PGPORT=5432 PGDATABASE=postgres PGUSER=postgres PGPASSWORD=${db_password} pypgstac migrate
 
 static: flake8 cfn-lint
 
