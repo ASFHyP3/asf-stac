@@ -1,4 +1,5 @@
 # TODO pin versions
+
 boto3
 cfn-lint
 flake8
@@ -7,3 +8,11 @@ pystac
 requests
 shapely
 tqdm
+
+# TODO move to separate requirements file for Docker image:
+pygeofilter==0.2.0
+stac-fastapi.api
+stac-fastapi.types
+stac-fastapi.extensions
+stac-fastapi.pgstac
+uvicorn
