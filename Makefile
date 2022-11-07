@@ -1,13 +1,17 @@
 install:
+	python -m pip install --upgrade pip && \
 	python -m pip install -r requirements.txt
 
-template_path ?= '' # TODO
-s3_bucket ?= '' # TODO
-stack_name ?= '' # TODO
+install-lambda-deps:
+	python -m pip install --upgrade pip && \
+	python -m pip install -r apps/api/requirements.txt -t apps/api/src/
+
+s3_bucket ?= ''
+stack_name ?= ''
 # TODO allow adding --role-arn option to deploy command, for cicd
 deploy:
 	aws cloudformation package \
-	    --template-file ${template_path} \
+	    --template-file apps/cloudformation.yml \
 	    --s3-bucket ${s3_bucket} \
 	    --output-template-file packaged.yml \
 	&& aws cloudformation deploy \
@@ -18,8 +22,8 @@ deploy:
 	      AsfNetworkCidr=${ASF_NETWORK_CIDR} \
 	      DatabasePassword=${DATABASE_PASSWORD}
 
-db_host ?= 'host'
-db_password ?= 'password'
+db_host ?= ''
+db_password ?= ''
 psql:
 	PGHOST=${db_host} PGPORT=5432 PGDATABASE=postgres PGUSER=postgres PGPASSWORD=${db_password} psql
 
@@ -35,4 +39,4 @@ flake8:
 	flake8 --max-line-length=120
 
 cfn-lint:
-	cfn-lint --template `find . -name cloudformation.yml` --info
+	cfn-lint --template `find . -name cloudformation.yml` --info --ignore-checks W3002

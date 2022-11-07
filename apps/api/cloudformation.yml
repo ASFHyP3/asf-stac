@@ -1,12 +1,101 @@
 AWSTemplateFormatVersion: 2010-09-09
 
-Resources:
-  Cluster:
-    Type: AWS::ECS::Cluster
+Parameters:
+  DatabaseHost:
+    Type: String
+    NoEcho: true
 
-  TaskDefinition:
-    Type: AWS::ECS::TaskDefinition
+  DatabasePassword:
+    Type: String
+    NoEcho: true
+
+# TODO the lambda should run inside the default VPC
+Resources:
+  Lambda:
+    Type: AWS::Lambda::Function
     Properties:
-      ContainerDefinitions:
-        - Name: stac-fastapi
-          Image: '' # TODO
+      Environment:
+        Variables:
+          POSTGRES_HOST_READER: !Ref DatabaseHost
+          POSTGRES_HOST_WRITER: !Ref DatabaseHost
+          POSTGRES_PORT: 5432
+          POSTGRES_DBNAME: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_PASS: !Ref DatabasePassword
+      Code: src/
+      Handler: api.handler
+      Role: !GetAtt LambdaRole.Arn
+      Runtime: python3.9
+      Timeout: 30
+
+  LambdaLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${Lambda}"
+      RetentionInDays: 90
+
+  LambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          Action: sts:AssumeRole
+          Principal:
+            Service: lambda.amazonaws.com
+          Effect: Allow
+      ManagedPolicyArns:
+        - !Ref LambdaPolicy
+
+  LambdaPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+            Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/*"
+
+  Api:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: !Ref AWS::StackName
+      ProtocolType: HTTP
+      Target: !GetAtt Lambda.Arn
+      CredentialsArn: !GetAtt ApiRole.Arn
+
+  ApiOverrides:
+    Type: AWS::ApiGatewayV2::ApiGatewayManagedOverrides
+    Properties:
+      ApiId: !Ref Api
+      Stage:
+        AccessLogSettings:
+          DestinationArn: !GetAtt ApiLogGroup.Arn
+          Format: '{"sourceIp":"$context.identity.sourceIp","httpMethod":"$context.httpMethod","path":"$context.path","status":"$context.status","responseLength":"$context.responseLength","responseLatency":"$context.responseLatency","requestTime":"$context.requestTime","protocol":"$context.protocol","userAgent":"$context.identity.userAgent","requestId":"$context.requestId"}'
+
+  ApiLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      RetentionInDays: 180
+
+  ApiRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          Action: sts:AssumeRole
+          Principal:
+            Service: apigateway.amazonaws.com
+          Effect: Allow
+      Policies:
+        - PolicyName: policy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: lambda:InvokeFunction
+                Resource: !GetAtt Lambda.Arn

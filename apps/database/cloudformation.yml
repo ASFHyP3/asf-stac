@@ -9,6 +9,11 @@ Parameters:
     Type: String
     NoEcho: true
 
+Outputs:
+  DatabaseHost:
+    Value: !GetAtt DatabaseInstance.Endpoint.Address
+
+# TODO the database should also accept connections from w/in the default VPC
 Resources:
   DatabaseInstance:
     Type: AWS::RDS::DBInstance

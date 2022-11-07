@@ -1,0 +1,27 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Parameters:
+  AsfNetworkCidr:
+    Type: String
+    NoEcho: true
+
+  DatabasePassword:
+    Type: String
+    NoEcho: true
+
+Resources:
+  Api:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        DatabaseHost: !GetAtt Database.Outputs.DatabaseHost
+        DatabasePassword: !Ref DatabasePassword
+      TemplateURL: api/cloudformation.yml
+
+  Database:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        AsfNetworkCidr: !Ref AsfNetworkCidr
+        DatabasePassword: !Ref DatabasePassword
+      TemplateURL: database/cloudformation.yml

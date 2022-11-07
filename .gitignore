@@ -1,2 +1,6 @@
 # CloudFormation
 packaged.yml
+
+# Lambda dependencies
+apps/api/src/*
+!apps/api/src/api.py
