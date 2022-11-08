@@ -1,4 +1,1 @@
-from mangum import Mangum
-from stac_fastapi.pgstac.app import app
-
-handler = Mangum(app)
+from stac_fastapi.pgstac.app import handler  # noqa: F401
