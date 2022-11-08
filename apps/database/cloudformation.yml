@@ -1,10 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 
 Parameters:
-  AsfNetworkCidr:
-    Type: String
-    NoEcho: true
-
   DatabasePassword:
     Type: String
     NoEcho: true
@@ -13,7 +9,6 @@ Outputs:
   DatabaseHost:
     Value: !GetAtt DatabaseInstance.Endpoint.Address
 
-# TODO the database should also accept connections from w/in the default VPC
 Resources:
   DatabaseInstance:
     Type: AWS::RDS::DBInstance
@@ -32,9 +27,10 @@ Resources:
       PubliclyAccessible: true
       # TODO: StorageType: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-rds-dbinstance.html#cfn-rds-dbinstance-storagetype
 
+  # TODO only allow incoming connections from within the ASF network and from our Lambda function
   DatabaseSecurityGroup:
     Type: AWS::RDS::DBSecurityGroup
     Properties:
       DBSecurityGroupIngress:
-        - CIDRIP: !Ref AsfNetworkCidr
-      GroupDescription: Allows incoming connections from within the ASF network.
+        - CIDRIP: 0.0.0.0/0
+      GroupDescription: STAC API database security group.

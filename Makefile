@@ -19,7 +19,6 @@ deploy:
 	    --stack-name ${stack_name} \
 	    --capabilities CAPABILITY_NAMED_IAM \
 	    --parameter-overrides \
-	      AsfNetworkCidr=${ASF_NETWORK_CIDR} \
 	      DatabasePassword=${DATABASE_PASSWORD}
 
 db_host ?= ''

@@ -9,7 +9,6 @@ Parameters:
     Type: String
     NoEcho: true
 
-# TODO the lambda should run inside the default VPC
 Resources:
   Lambda:
     Type: AWS::Lambda::Function
