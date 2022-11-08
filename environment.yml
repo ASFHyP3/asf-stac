@@ -1,6 +1,5 @@
 name: asf-stac
 channels:
-  - hyp3
   - conda-forge
   - nodefaults
 dependencies:
