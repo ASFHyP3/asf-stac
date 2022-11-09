@@ -1,4 +1,5 @@
-from concurrent.futures import ThreadPoolExecutor
+import os.path
+from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 from datetime import datetime
 from itertools import repeat
 from pathlib import Path
@@ -263,6 +264,45 @@ def get_all_tiles(s3_client, bucket, prefix, requester_pays=False):
     with open('prefixes.txt', 'w') as f:
         f.writelines([x+'\n' for x in prefixes])
     return prefixes
+
+
+def _update_child(child, catalog_root, catalog_parent_link, catalog_href):
+    import pystac
+    from pystac.layout import BestPracticesLayoutStrategy
+
+    strategy = BestPracticesLayoutStrategy()
+
+    child.set_root(catalog_root)
+    child.remove_links(pystac.RelType.PARENT)
+    child.add_link(catalog_parent_link)
+    if catalog_href:
+        child_href = strategy.get_href(child, os.path.dirname(catalog_href))
+        child.set_self_href(child_href)
+
+    return child
+
+
+def parallel_add_children(catalog, children):
+    from pystac.link import Link
+
+    catalog_href = catalog.get_self_href()
+    catalog_root = catalog.get_root()
+    catalog_parent_link = Link.parent(catalog)
+
+    with ProcessPoolExecutor() as executor:
+        children = list(tqdm(executor.map(
+            _update_child, children, [catalog_root]*len(children), [catalog_parent_link]*len(children), [catalog_href]*len(children),
+        ), total=len(children)))
+
+    links = []
+    for child in tqdm(children):
+        link = Link.child(child)
+        link.set_owner(catalog)
+        links.append(link)
+
+    catalog.links.extend(links)
+
+    return catalog
 
 
 if __name__ == '__main__':
