@@ -18,7 +18,8 @@ Run the following command to list the Postgres versions supported by Amazon RDS:
 aws rds describe-db-engine-versions --engine postgres --query "DBEngineVersions[].EngineVersion"
 ```
 
-To upgrade to a newer version, change the version specified in <apps/database/cloudformation.yml>.
+To upgrade to a newer version, change the version specified in the
+[database CloudFormation template](apps/database/cloudformation.yml).
 
 ### Connecting to the database
 
