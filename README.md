@@ -18,7 +18,7 @@ The initial AWS deployment creates a Postgres database, installs the PostGIS ext
     aws rds describe-db-engine-versions --engine postgres
     ```
    Identify the entry that corresponds to the current version of the database.
-   Then identify the newest available version from the list of valid upgrade targets given for the current version.
+   Then identify the newest available version from the list of valid upgrade targets for the current version.
    This will be the new version for the database.
 
 2. Change the Postgres version specified in the [database CloudFormation template](apps/database/cloudformation.yml)
