@@ -29,6 +29,8 @@ jobs:
           python-version: 3.9
       - name: Install Lambda dependencies
         run: make install-lambda-deps
+      - name: Install database migration dependencies
+        run: make install-db-migration-deps
       - name: Deploy CloudFormation stack
         # TODO prevent passwords from being echoed
         run: |
@@ -37,12 +39,13 @@ jobs:
             stack_name=${{ env.STACK_NAME }} \
             cloudformation_role_arn=${{ env.CLOUDFORMATION_ROLE_ARN }} \
             new_db_password=${{ env.DATABASE_PASSWORD }}
-      - name: Install PostGIS
+      - name: Get database host
         run: |
-          make install-postgis \
-            db_host=$(aws cloudformation describe-stacks \
-                      --stack-name $STACK_NAME \
-                      --query 'Stacks[0].Outputs[?OutputKey==`DatabaseHost`].OutputValue' \
-                      --output text) \
-            db_password=${{ env.DATABASE_PASSWORD }}
-      # TODO migrate command
+          DATABASE_HOST=$(aws cloudformation describe-stacks \
+                          --stack-name $STACK_NAME \
+                          --query 'Stacks[0].Outputs[?OutputKey==`DatabaseHost`].OutputValue' \
+                          --output text)
+      - name: Install or upgrade PostGIS
+        run: make install-or-upgrade-postgis db_host=$DATABASE_HOST db_password=${{ env.DATABASE_PASSWORD }}
+      - name: Migrate database
+        run: make migrate db_host=$DATABASE_HOST db_password=${{ env.DATABASE_PASSWORD }}

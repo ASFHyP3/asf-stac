@@ -6,6 +6,10 @@ install-lambda-deps:
 	python -m pip install --upgrade pip && \
 	python -m pip install -r apps/api/requirements.txt -t apps/api/src/
 
+install-db-migration-deps:
+	python -m pip install --upgrade pip && \
+	python -m pip install -r requirements-database-migrations.txt
+
 s3_bucket ?= ''
 stack_name ?= ''
 cloudformation_role_arn ?= ''
@@ -29,9 +33,8 @@ db_password ?= ''
 psql:
 	PGHOST=${db_host} PGPORT=5432 PGDATABASE=postgres PGUSER=postgres PGPASSWORD=${db_password} psql
 
-install-postgis:
-	PGHOST=${db_host} PGPORT=5432 PGDATABASE=postgres PGUSER=postgres PGPASSWORD=${db_password} psql \
-	       -c 'CREATE EXTENSION postgis;'
+install-or-upgrade-postgis:
+	PGHOST=${db_host} PGPORT=5432 PGDATABASE=postgres PGUSER=postgres PGPASSWORD=${db_password} psql -f install-or-upgrade-postgis.sql
 
 migrate:
 	PGHOST=${db_host} PGPORT=5432 PGDATABASE=postgres PGUSER=postgres PGPASSWORD=${db_password} pypgstac migrate
