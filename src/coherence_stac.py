@@ -266,13 +266,12 @@ def get_all_tiles(s3_client, bucket, prefix, requester_pays=False):
     return prefixes
 
 
-def _update_child(child, catalog_root, catalog_parent_link, catalog_href):
+def _update_child(child, catalog_parent_link, catalog_href):
     import pystac
     from pystac.layout import BestPracticesLayoutStrategy
 
     strategy = BestPracticesLayoutStrategy()
 
-    child.set_root(catalog_root)
     child.remove_links(pystac.RelType.PARENT)
     child.add_link(catalog_parent_link)
     if catalog_href:
@@ -286,16 +285,17 @@ def parallel_add_children(catalog, children):
     from pystac.link import Link
 
     catalog_href = catalog.get_self_href()
-    catalog_root = catalog.get_root()
+
     catalog_parent_link = Link.parent(catalog)
 
     with ProcessPoolExecutor() as executor:
         children = list(tqdm(executor.map(
-            _update_child, children, [catalog_root]*len(children), [catalog_parent_link]*len(children), [catalog_href]*len(children),
+            _update_child, children, [catalog_parent_link]*len(children), [catalog_href]*len(children),
         ), total=len(children)))
 
     links = []
     for child in tqdm(children):
+        child.set_root(catalog)
         link = Link.child(child)
         link.set_owner(catalog)
         links.append(link)
@@ -327,16 +327,8 @@ if __name__ == '__main__':
         )
     
     print('creating catalog...')
-    invalid_tiles = []
     catalog = create_stac_catalog()
-    for result in results:
-        if isinstance(result, pystac.collection.Collection):
-            catalog.add_child(result)
-        else:
-            invalid_tiles.append(result)
-
+    catalog = parallel_add_children(catalog, results)
 
     print('saving catalog...')
     catalog_name = save_stac_catalog_locally(catalog, 'coherence_stac')
-    with open('data/invalid_tiles.txt', 'w') as f:
-        f.writelines([x+'\n' for x in invalid_tiles])
