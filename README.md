@@ -10,8 +10,6 @@ TODO: document creating conda env and installing developer deps
 
 ### Upgrading the database
 
-TODO: document upgrading Postgres, PostGIS, and PgSTAC
-
 Run the following command to list the Postgres versions supported by Amazon RDS:
 
 ```
@@ -31,6 +29,10 @@ SELECT * FROM pg_available_extension_versions WHERE name='postgis';
 ```
 
 To upgrade PostGIS, change the version specified in the [install/upgrade script](install-or-upgrade-postgis.sql).
+
+PgSTAC upgrades are handled automatically: the [deployment workflow](.github/workflows/deploy-stac-api.yml)
+migrates the database to the installed version of `pypgstac`. See <https://stac-utils.github.io/pgstac/pypgstac>
+for more information about migrations.
 
 ### Connecting to the database
 
