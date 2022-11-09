@@ -10,28 +10,27 @@ TODO: document creating conda env and installing developer deps
 
 ### Upgrading the database
 
-Our deployment workflow creates a Postgres database, installs the PostGIS extension, and then installs
-[PgSTAC](https://stac-utils.github.io/pgstac). Below are instructions for upgrading the database.
+The initial AWS deployment creates a Postgres database, installs the PostGIS extension, and then installs
+[PgSTAC](https://stac-utils.github.io/pgstac). Follow these steps to upgrade the database:
 
-Run the following command to list the Postgres versions supported by Amazon RDS:
+1. Run the following command to list the Postgres versions supported by Amazon RDS:
+    ```
+    aws rds describe-db-engine-versions --engine postgres
+    ```
+   Identify the entry that corresponds to the current version of the database.
+   Then identify the newest available version from the list of valid upgrade targets given for the current version.
+   This will be the new version for the database.
 
-```
-aws rds describe-db-engine-versions --engine postgres --query "DBEngineVersions[].EngineVersion"
-```
+2. Change the Postgres version specified in the [database CloudFormation template](apps/database/cloudformation.yml)
+   to the new version.
 
-To upgrade Postgres, change the version specified in the
-[database CloudFormation template](apps/database/cloudformation.yml).
+3. Next, refer to the tables shown
+   [here](https://docs.aws.amazon.com/AmazonRDS/latest/PostgreSQLReleaseNotes/postgresql-extensions.html)
+   to determine which version of the PostGIS extension is supported by the new Postgres version.
 
-When you upgrade Postgres, you should also upgrade the PostGIS extension. Refer to the tables shown
-[here](https://docs.aws.amazon.com/AmazonRDS/latest/PostgreSQLReleaseNotes/postgresql-extensions.html)
-to determine which version of PostGIS is supported by the database's Postgres version. You can also connect to the
-database and run the following query:
+4. Change the PostGIS version specified in the [install/upgrade script](install-or-upgrade-postgis.sql).
 
-```
-SELECT * FROM pg_available_extension_versions WHERE name='postgis';
-```
-
-To upgrade PostGIS, change the version specified in the [install/upgrade script](install-or-upgrade-postgis.sql).
+5. Deploy to AWS.
 
 PgSTAC upgrades are handled automatically: the [deployment workflow](.github/workflows/deploy-stac-api.yml)
 migrates the database to the installed version of `pypgstac`. See <https://stac-utils.github.io/pgstac/pypgstac>
