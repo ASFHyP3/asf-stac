@@ -1,4 +1,1 @@
-psycopg==3.0.18
-psycopg-binary==3.0.18
-psycopg-pool==3.1.4
-pypgstac==0.6.10
+pypgstac[psycopg]==0.6.10
