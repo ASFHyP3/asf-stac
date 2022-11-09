@@ -29,8 +29,8 @@ jobs:
           python-version: 3.9
       - name: Install Lambda dependencies
         run: make -s install-lambda-deps
-      - name: Install database migration dependencies
-        run: make -s install-db-migration-deps
+      - name: Install pyPgSTAC
+        run: make -s install-pypgstac
       - name: Deploy CloudFormation stack
         run: |
           make -s deploy \
@@ -46,5 +46,5 @@ jobs:
                                 --output text)" >> $GITHUB_ENV
       - name: Install or upgrade PostGIS
         run: make -s install-or-upgrade-postgis db_host=$DATABASE_HOST db_password=${{ env.DATABASE_PASSWORD }}
-      - name: Migrate database
-        run: make -s migrate db_host=$DATABASE_HOST db_password=${{ env.DATABASE_PASSWORD }}
+      - name: Install or upgrade PgSTAC
+        run: make -s pypgstac-migrate db_host=$DATABASE_HOST db_password=${{ env.DATABASE_PASSWORD }}

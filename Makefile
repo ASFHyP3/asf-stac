@@ -2,13 +2,13 @@ install:
 	python -m pip install --upgrade pip && \
 	python -m pip install -r requirements.txt
 
+install-pypgstac:
+	python -m pip install --upgrade pip && \
+	python -m pip install $$(grep pypgstac requirements.txt)
+
 install-lambda-deps:
 	python -m pip install --upgrade pip && \
 	python -m pip install -r apps/api/requirements.txt -t apps/api/src/
-
-install-db-migration-deps:
-	python -m pip install --upgrade pip && \
-	python -m pip install -r requirements-database-migrations.txt
 
 s3_bucket ?= ''
 stack_name ?= ''
@@ -36,7 +36,7 @@ psql:
 install-or-upgrade-postgis:
 	PGHOST=${db_host} PGPORT=5432 PGDATABASE=postgres PGUSER=postgres PGPASSWORD=${db_password} psql -f install-or-upgrade-postgis.sql
 
-migrate:
+pypgstac-migrate:
 	PGHOST=${db_host} PGPORT=5432 PGDATABASE=postgres PGUSER=postgres PGPASSWORD=${db_password} pypgstac migrate
 
 run-api:
