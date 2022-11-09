@@ -8,10 +8,6 @@ TODO: document creating conda env and installing developer deps
 
 ## STAC API
 
-### Manual deployment
-
-TODO: document deploying with `make`
-
 ### Connecting to the database
 
 Confirm you have the `psql` command installed, then run:

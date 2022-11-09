@@ -8,6 +8,8 @@ install-lambda-deps:
 
 s3_bucket ?= ''
 stack_name ?= ''
+cloudformation_role_arn ?= ''
+new_db_password ?= ''
 # TODO allow adding --role-arn option to deploy command, for cicd
 deploy:
 	aws cloudformation package \
@@ -18,8 +20,9 @@ deploy:
 	    --template-file packaged.yml \
 	    --stack-name ${stack_name} \
 	    --capabilities CAPABILITY_NAMED_IAM \
+	    --role-arn ${cloudformation_role_arn} \
 	    --parameter-overrides \
-	      DatabasePassword=${DATABASE_PASSWORD}
+	      DatabasePassword=${new_db_password}
 
 db_host ?= ''
 db_password ?= ''

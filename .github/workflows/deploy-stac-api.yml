@@ -1,0 +1,38 @@
+name: Deploy STAC API
+
+on:
+  push:
+    branches:
+      - sandbox
+
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  CF_TEMPLATES_BUCKET: ${{ secrets.CF_TEMPLATES_BUCKET }}
+  CLOUDFORMATION_ROLE_ARN: ${{ secrets.CLOUDFORMATION_ROLE_ARN }}
+  DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+  STACK_NAME: stac-api-sandbox
+
+jobs:
+  deploy-stac-api:
+    runs-on: ubuntu-latest
+    environment: sandbox
+    steps:
+      - uses: actions/checkout@v3
+      - uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-west-2
+      - uses: actions/setup-python@v3
+        with:
+          python-version: 3.9
+      - name: Install Lambda dependencies
+        run: make install-lambda-deps
+      - name: Deploy CloudFormation stack
+        run: |
+          make deploy \
+            s3_bucket=${{ env.CF_TEMPLATES_BUCKET }} \
+            stack_name=${{ env.STACK_NAME }} \
+            cloudformation_role_arn=${{ env.CLOUDFORMATION_ROLE_ARN }} \
+            new_db_password=${{ env.DATABASE_PASSWORD }}
