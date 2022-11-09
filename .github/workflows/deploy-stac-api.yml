@@ -36,3 +36,12 @@ jobs:
             stack_name=${{ env.STACK_NAME }} \
             cloudformation_role_arn=${{ env.CLOUDFORMATION_ROLE_ARN }} \
             new_db_password=${{ env.DATABASE_PASSWORD }}
+      - name: Install PostGIS
+        run: |
+          make install-postgis \
+            db_host=$(aws cloudformation describe-stacks \
+                      --stack-name $STACK_NAME \
+                      --query 'Stacks[0].Outputs[?OutputKey==`DatabaseHost`].OutputValue' \
+                      --output text) \
+            db_password=${{ env.DATABASE_PASSWORD }}
+      # TODO migrate command

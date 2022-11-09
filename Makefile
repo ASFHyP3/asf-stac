@@ -29,6 +29,10 @@ db_password ?= ''
 psql:
 	PGHOST=${db_host} PGPORT=5432 PGDATABASE=postgres PGUSER=postgres PGPASSWORD=${db_password} psql
 
+install-postgis:
+	PGHOST=${db_host} PGPORT=5432 PGDATABASE=postgres PGUSER=postgres PGPASSWORD=${db_password} psql \
+	       -c 'CREATE EXTENSION postgis;'
+
 migrate:
 	PGHOST=${db_host} PGPORT=5432 PGDATABASE=postgres PGUSER=postgres PGPASSWORD=${db_password} pypgstac migrate
 
