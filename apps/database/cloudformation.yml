@@ -18,7 +18,7 @@ Resources:
       DBSecurityGroups:
         - !Ref DatabaseSecurityGroup
       Engine: postgres
-      EngineVersion: '14.1'
+      EngineVersion: '14.4'
       MasterUsername: postgres
       MasterUserPassword: !Ref DatabasePassword
       # TODO: MaxAllocatedStorage: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-rds-dbinstance.html#cfn-rds-dbinstance-maxallocatedstorage
