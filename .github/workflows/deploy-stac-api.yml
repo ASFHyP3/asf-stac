@@ -41,10 +41,10 @@ jobs:
             new_db_password=${{ env.DATABASE_PASSWORD }}
       - name: Get database host
         run: |
-          DATABASE_HOST=$(aws cloudformation describe-stacks \
-                          --stack-name $STACK_NAME \
-                          --query 'Stacks[0].Outputs[?OutputKey==`DatabaseHost`].OutputValue' \
-                          --output text)
+          echo "DATABASE_HOST=$(aws cloudformation describe-stacks \
+                                --stack-name $STACK_NAME \
+                                --query 'Stacks[0].Outputs[?OutputKey==`DatabaseHost`].OutputValue' \
+                                --output text)" >> $GITHUB_ENV
       - name: Install or upgrade PostGIS
         run: make install-or-upgrade-postgis db_host=$DATABASE_HOST db_password=${{ env.DATABASE_PASSWORD }}
       - name: Migrate database
