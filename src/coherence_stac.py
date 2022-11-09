@@ -289,14 +289,14 @@ if __name__ == '__main__':
     print('creating catalog...')
     invalid_tiles = []
     catalog = create_stac_catalog()
-    for result in results:
+    for result in tqdm(results):
         if isinstance(result, pystac.collection.Collection):
             catalog.add_child(result)
         else:
             invalid_tiles.append(result)
 
-
     print('saving catalog...')
     catalog_name = save_stac_catalog_locally(catalog, 'coherence_stac')
-    with open('data/invalid_tiles.txt', 'w') as f:
-        f.writelines([x+'\n' for x in invalid_tiles])
+    if invalid_tiles:
+        with open('data/invalid_tiles.txt', 'w') as f:
+            f.writelines([x+'\n' for x in invalid_tiles])
