@@ -1,3 +1,3 @@
--- TODO create extension with appropriate version: https://www.postgresql.org/docs/current/sql-createextension.html
--- TODO upgrade extension to appropriate version
-CREATE EXTENSION IF NOT EXISTS postgis;
+postgis_version CONSTANT string := '3.1.5';
+CREATE EXTENSION IF NOT EXISTS postgis WITH VERSION postgis_version;
+ALTER EXTENSION postgis UPDATE TO postgis_version;
