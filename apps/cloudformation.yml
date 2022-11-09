@@ -5,6 +5,10 @@ Parameters:
     Type: String
     NoEcho: true
 
+Outputs:
+  DatabaseHost:
+    Value: !GetAtt Database.Outputs.DatabaseHost
+
 Resources:
   Api:
     Type: AWS::CloudFormation::Stack
