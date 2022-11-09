@@ -11,7 +11,7 @@ env:
   CF_TEMPLATES_BUCKET: ${{ secrets.CF_TEMPLATES_BUCKET }}
   CLOUDFORMATION_ROLE_ARN: ${{ secrets.CLOUDFORMATION_ROLE_ARN }}
   DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
-  STACK_NAME: stac-api-sandbox
+  STACK_NAME: stac-api-sandbox-test-postgres-upgrade
 
 jobs:
   deploy-stac-api:
