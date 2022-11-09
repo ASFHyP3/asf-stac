@@ -10,6 +10,9 @@ TODO: document creating conda env and installing developer deps
 
 ### Upgrading the database
 
+Our deployment workflow creates a Postgres database, installs the PostGIS extension, and then installs
+[PgSTAC](https://stac-utils.github.io/pgstac). Below are instructions for upgrading the database.
+
 Run the following command to list the Postgres versions supported by Amazon RDS:
 
 ```
