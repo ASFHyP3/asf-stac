@@ -23,7 +23,7 @@ Resources:
           POSTGRES_PASS: !Ref DatabasePassword
       Code: src/
       Handler: api.handler
-      MemorySize: 4000
+      MemorySize: 2000
       Role: !GetAtt LambdaRole.Arn
       Runtime: python3.9
       Timeout: 30
