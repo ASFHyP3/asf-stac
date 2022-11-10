@@ -25,7 +25,7 @@ deploy:
 	      DatabaseReadPassword=${db_read_password}
 
 psql:
-	PGHOST=${db_host} PGPORT=5432 PGDATABASE=postgres PGUSER=postgres PGPASSWORD=${db_admin_password} psql
+	PGHOST=${db_host} PGPORT=5432 PGDATABASE=postgres PGUSER=${db_user} PGPASSWORD=${db_password} psql
 
 install-or-upgrade-postgis:
 	PGHOST=${db_host} PGPORT=5432 PGDATABASE=postgres PGUSER=postgres PGPASSWORD=${db_admin_password} psql \

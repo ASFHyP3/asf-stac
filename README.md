@@ -8,6 +8,8 @@ TODO: document creating conda env and installing developer deps
 
 ## STAC API
 
+TODO: proofread docs since adding three database users
+
 ### Upgrading the database
 
 The initial AWS deployment creates a Postgres database, installs the PostGIS extension, and then installs
@@ -41,7 +43,7 @@ for more information about migrations.
 Confirm you have the `psql` command installed, then run:
 
 ```
-make psql db_host=<host> db_password=<password>
+make psql db_host=<host> db_user=<user> db_password=<password>
 ```
 
 You can find the appropriate value for `<host>` by navigating to the database instance via the CloudFormation or
