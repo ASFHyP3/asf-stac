@@ -21,7 +21,8 @@ deploy:
 	    --capabilities CAPABILITY_NAMED_IAM \
 	    --role-arn ${cloudformation_role_arn} \
 	    --parameter-overrides \
-	      DatabasePassword=${db_admin_password}
+	      DatabaseAdminPassword=${db_admin_password} \
+	      DatabaseReadPassword=${db_read_password}
 
 psql:
 	PGHOST=${db_host} PGPORT=5432 PGDATABASE=postgres PGUSER=postgres PGPASSWORD=${db_admin_password} psql
