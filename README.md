@@ -52,7 +52,7 @@ RDS console and copying the "Endpoint" field.
 To run the STAC API locally:
 
 ```
-make run-api db_host=<host> db_password=<password>
+make run-api db_host=<host> db_ingest_password=<password>
 ```
 
 You should see something like `Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)` in the output; you can

@@ -10,7 +10,9 @@ env:
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   CF_TEMPLATES_BUCKET: ${{ secrets.CF_TEMPLATES_BUCKET }}
   CLOUDFORMATION_ROLE_ARN: ${{ secrets.CLOUDFORMATION_ROLE_ARN }}
-  DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+  DB_ADMIN_PASSWORD: ${{ secrets.DB_ADMIN_PASSWORD }}
+  DB_INGEST_PASSWORD: ${{ secrets.DB_INGEST_PASSWORD }}
+  DB_READ_PASSWORD: ${{ secrets.DB_READ_PASSWORD }}
   STACK_NAME: stac-api-sandbox
 
 jobs:
@@ -37,7 +39,7 @@ jobs:
             s3_bucket=${{ env.CF_TEMPLATES_BUCKET }} \
             stack_name=${{ env.STACK_NAME }} \
             cloudformation_role_arn=${{ env.CLOUDFORMATION_ROLE_ARN }} \
-            new_db_password=${{ env.DATABASE_PASSWORD }}
+            db_admin_password=${{ env.DB_ADMIN_PASSWORD }}
       - name: Get database host
         run: |
           echo "DATABASE_HOST=$(aws cloudformation describe-stacks \
@@ -45,6 +47,13 @@ jobs:
                                 --query 'Stacks[0].Outputs[?OutputKey==`DatabaseHost`].OutputValue' \
                                 --output text)" >> $GITHUB_ENV
       - name: Install or upgrade PostGIS
-        run: make -s install-or-upgrade-postgis db_host=$DATABASE_HOST db_password=${{ env.DATABASE_PASSWORD }}
+        run: make -s install-or-upgrade-postgis db_host=$DATABASE_HOST db_admin_password=${{ env.DB_ADMIN_PASSWORD }}
       - name: Install or upgrade PgSTAC
-        run: make -s pypgstac-migrate db_host=$DATABASE_HOST db_password=${{ env.DATABASE_PASSWORD }}
+        run: make -s pypgstac-migrate db_host=$DATABASE_HOST db_admin_password=${{ env.DB_ADMIN_PASSWORD }}
+      - name: Configure database roles
+        run: |
+          make -s configure-database-roles \
+            db_host=$DATABASE_HOST \
+            db_admin_password=${{ env.DB_ADMIN_PASSWORD }} \
+            db_ingest_password=${{ env.DB_INGEST_PASSWORD }} \
+            db_read_password=${{ env.DB_READ_PASSWORD }}

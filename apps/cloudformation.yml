@@ -1,7 +1,11 @@
 AWSTemplateFormatVersion: 2010-09-09
 
 Parameters:
-  DatabasePassword:
+  DatabaseAdminPassword:
+    Type: String
+    NoEcho: true
+
+  DatabaseReadPassword:
     Type: String
     NoEcho: true
 
@@ -15,12 +19,12 @@ Resources:
     Properties:
       Parameters:
         DatabaseHost: !GetAtt Database.Outputs.DatabaseHost
-        DatabasePassword: !Ref DatabasePassword
+        DatabaseReadPassword: !Ref DatabaseReadPassword
       TemplateURL: api/cloudformation.yml
 
   Database:
     Type: AWS::CloudFormation::Stack
     Properties:
       Parameters:
-        DatabasePassword: !Ref DatabasePassword
+        DatabaseAdminPassword: !Ref DatabaseAdminPassword
       TemplateURL: database/cloudformation.yml

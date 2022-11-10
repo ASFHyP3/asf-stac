@@ -1,7 +1,7 @@
 AWSTemplateFormatVersion: 2010-09-09
 
 Parameters:
-  DatabasePassword:
+  DatabaseAdminPassword:
     Type: String
     NoEcho: true
 
@@ -20,7 +20,7 @@ Resources:
       Engine: postgres
       EngineVersion: '14.4'
       MasterUsername: postgres
-      MasterUserPassword: !Ref DatabasePassword
+      MasterUserPassword: !Ref DatabaseAdminPassword
       # TODO: MaxAllocatedStorage: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-rds-dbinstance.html#cfn-rds-dbinstance-maxallocatedstorage
       Port: '5432'
       # TODO: ProcessorFeatures: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-rds-dbinstance.html#cfn-rds-dbinstance-processorfeatures

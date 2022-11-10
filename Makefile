@@ -10,11 +10,6 @@ install-lambda-deps:
 	python -m pip install --upgrade pip && \
 	python -m pip install -r apps/api/requirements.txt -t apps/api/src/
 
-s3_bucket ?= ''
-stack_name ?= ''
-cloudformation_role_arn ?= ''
-new_db_password ?= ''
-# TODO allow adding --role-arn option to deploy command, for cicd
 deploy:
 	aws cloudformation package \
 	    --template-file apps/cloudformation.yml \
@@ -26,21 +21,28 @@ deploy:
 	    --capabilities CAPABILITY_NAMED_IAM \
 	    --role-arn ${cloudformation_role_arn} \
 	    --parameter-overrides \
-	      DatabasePassword=${new_db_password}
+	      DatabasePassword=${db_admin_password}
 
-db_host ?= ''
-db_password ?= ''
 psql:
-	PGHOST=${db_host} PGPORT=5432 PGDATABASE=postgres PGUSER=postgres PGPASSWORD=${db_password} psql
+	PGHOST=${db_host} PGPORT=5432 PGDATABASE=postgres PGUSER=postgres PGPASSWORD=${db_admin_password} psql
 
 install-or-upgrade-postgis:
-	PGHOST=${db_host} PGPORT=5432 PGDATABASE=postgres PGUSER=postgres PGPASSWORD=${db_password} psql -f install-or-upgrade-postgis.sql
+	PGHOST=${db_host} PGPORT=5432 PGDATABASE=postgres PGUSER=postgres PGPASSWORD=${db_admin_password} psql \
+	    -f install-or-upgrade-postgis.sql
+
+configure-database-roles:
+	PGHOST=${db_host} PGPORT=5432 PGDATABASE=postgres PGUSER=postgres PGPASSWORD=${db_admin_password} psql \
+	    --set=db_ingest_password=${db_ingest_password} \
+	    --set=db_read_password=${db_read_password} \
+	    -f configure-database-roles.sql
 
 pypgstac-migrate:
-	PGHOST=${db_host} PGPORT=5432 PGDATABASE=postgres PGUSER=postgres PGPASSWORD=${db_password} pypgstac migrate
+	PGHOST=${db_host} PGPORT=5432 PGDATABASE=postgres PGUSER=postgres PGPASSWORD=${db_admin_password} pypgstac migrate
 
 run-api:
-	POSTGRES_HOST_READER=${db_host} POSTGRES_HOST_WRITER=${db_host} POSTGRES_PORT=5432 POSTGRES_DBNAME=postgres POSTGRES_USER=postgres POSTGRES_PASS=${db_password} python -m stac_fastapi.pgstac.app
+	POSTGRES_HOST_READER=${db_host} POSTGRES_HOST_WRITER=${db_host} POSTGRES_PORT=5432 \
+	    POSTGRES_DBNAME=postgres POSTGRES_USER=pgstac_ingest POSTGRES_PASS=${db_ingest_password} \
+	    python -m stac_fastapi.pgstac.app
 
 static: flake8 cfn-lint
 

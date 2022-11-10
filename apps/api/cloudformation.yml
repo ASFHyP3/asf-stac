@@ -5,7 +5,7 @@ Parameters:
     Type: String
     NoEcho: true
 
-  DatabasePassword:
+  DatabaseReadPassword:
     Type: String
     NoEcho: true
 
@@ -19,8 +19,8 @@ Resources:
           POSTGRES_HOST_WRITER: !Ref DatabaseHost
           POSTGRES_PORT: 5432
           POSTGRES_DBNAME: postgres
-          POSTGRES_USER: postgres
-          POSTGRES_PASS: !Ref DatabasePassword
+          POSTGRES_USER: pgstac_read
+          POSTGRES_PASS: !Ref DatabaseReadPassword
       Code: src/
       Handler: api.handler
       MemorySize: 2000
