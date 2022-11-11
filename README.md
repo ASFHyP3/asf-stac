@@ -8,7 +8,7 @@ TODO: document creating conda env and installing developer deps
 
 ## STAC API
 
-TODO: proofread docs since adding three database users
+TODO: proofread docs since adding multiple database users
 
 ### Upgrading the database
 
@@ -38,6 +38,11 @@ PgSTAC upgrades are handled automatically: the [deployment workflow](.github/wor
 migrates the database to the installed version of `pypgstac`. See <https://stac-utils.github.io/pgstac/pypgstac>
 for more information about migrations.
 
+### Retrieving database connection details
+
+The database host and database user credentials are available via the AWS Secrets Manager console
+in the AWS account where the CloudFormation stack was deployed.
+
 ### Connecting to the database
 
 Confirm you have the `psql` command installed, then run:
@@ -45,9 +50,6 @@ Confirm you have the `psql` command installed, then run:
 ```
 make psql db_host=<host> db_user=<user> db_password=<password>
 ```
-
-You can find the appropriate value for `<host>` by navigating to the database instance via the CloudFormation or
-RDS console and copying the "Endpoint" field.
 
 ### Running the API locally
 

@@ -41,3 +41,9 @@ Resources:
         VpcId: !Ref VpcId
         CidrIp: !Ref CidrIp
       TemplateURL: database/cloudformation.yml
+
+  DatabaseSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Description: !Sub "${AWS::StackName} database credentials"
+      SecretString: !Sub '{"database_host": "${Database.Outputs.DatabaseHost}", "admin_user": "postgres", "admin_password": "${DatabaseAdminPassword}", "read_user": "pgstac_read", "read_password": "${DatabaseReadPassword}"}'
