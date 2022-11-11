@@ -8,7 +8,7 @@ TODO: document creating conda env and installing developer deps
 
 ## STAC API
 
-TODO: proofread docs since adding three database users
+TODO: proofread docs since adding multiple database users
 
 ### Upgrading the database
 
