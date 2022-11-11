@@ -29,14 +29,8 @@ Resources:
         DatabaseAdminPassword: !Ref DatabaseAdminPassword
       TemplateURL: database/cloudformation.yml
 
-  DatabaseAdminSecret:
+  DatabaseSecret:
     Type: AWS::SecretsManager::Secret
     Properties:
-      Description: !Sub "${AWS::StackName} database credentials for 'postgres' user"
-      SecretString: !Sub '{"password": "${DatabaseAdminPassword}"}'
-
-  DatabaseReadSecret:
-    Type: AWS::SecretsManager::Secret
-    Properties:
-      Description: !Sub "${AWS::StackName} database credentials for 'pgstac_read' user"
-      SecretString: !Sub '{"password": "${DatabaseReadPassword}"}'
+      Description: !Sub "${AWS::StackName} database credentials"
+      SecretString: !Sub '{"admin_user": "postgres", "admin_password": "${DatabaseAdminPassword}", "read_user": "pgstac_read", "read_password": "${DatabaseReadPassword}"}'
