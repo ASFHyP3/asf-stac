@@ -13,7 +13,7 @@ env:
   DB_ADMIN_PASSWORD: ${{ secrets.DB_ADMIN_PASSWORD }}
   DB_READ_PASSWORD: ${{ secrets.DB_READ_PASSWORD }}
   STACK_NAME: stac-api-sandbox
-  VPD_ID: ${{ secrets.VPD_ID }}
+  VPC_ID: ${{ secrets.VPC_ID }}
   SUBNET_IDS: ${{ secrets.SUBNET_IDS }}
   CIDR_IP: ${{ secrets.CIDR_IP }}
 
