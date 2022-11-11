@@ -33,4 +33,4 @@ Resources:
     Type: AWS::SecretsManager::Secret
     Properties:
       Description: !Sub "${AWS::StackName} database credentials"
-      SecretString: !Sub '{"admin_user": "postgres", "admin_password": "${DatabaseAdminPassword}", "read_user": "pgstac_read", "read_password": "${DatabaseReadPassword}"}'
+      SecretString: !Sub '{"database_host": "${Database.Outputs.DatabaseHost}", "admin_user": "postgres", "admin_password": "${DatabaseAdminPassword}", "read_user": "pgstac_read", "read_password": "${DatabaseReadPassword}"}'
