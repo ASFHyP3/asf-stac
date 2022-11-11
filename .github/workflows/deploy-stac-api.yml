@@ -56,5 +56,4 @@ jobs:
           make -s configure-database-roles \
             db_host=$DATABASE_HOST \
             db_admin_password=${{ env.DB_ADMIN_PASSWORD }} \
-            db_ingest_password=${{ env.DB_INGEST_PASSWORD }} \
             db_read_password=${{ env.DB_READ_PASSWORD }}

@@ -33,7 +33,6 @@ install-or-upgrade-postgis:
 
 configure-database-roles:
 	PGHOST=${db_host} PGPORT=5432 PGDATABASE=postgres PGUSER=postgres PGPASSWORD=${db_admin_password} psql \
-	    --set=db_ingest_password=${db_ingest_password} \
 	    --set=db_read_password=${db_read_password} \
 	    -f configure-database-roles.sql
 
@@ -42,7 +41,7 @@ pypgstac-migrate:
 
 run-api:
 	POSTGRES_HOST_READER=${db_host} POSTGRES_HOST_WRITER=${db_host} POSTGRES_PORT=5432 \
-	    POSTGRES_DBNAME=postgres POSTGRES_USER=pgstac_ingest POSTGRES_PASS=${db_ingest_password} \
+	    POSTGRES_DBNAME=postgres POSTGRES_USER=postgres POSTGRES_PASS=${db_admin_password} \
 	    python -m stac_fastapi.pgstac.app
 
 static: flake8 cfn-lint
