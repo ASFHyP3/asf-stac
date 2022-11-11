@@ -8,7 +8,7 @@ install-pypgstac:
 
 install-lambda-deps:
 	python -m pip install --upgrade pip && \
-	python -m pip install -r apps/api/requirements.txt -t apps/api/src/
+	python -m pip install -r requirements-apps-api.txt -t apps/api/src/
 
 deploy:
 	aws cloudformation package \

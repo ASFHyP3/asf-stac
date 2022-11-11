@@ -1,4 +1,4 @@
--r apps/api/requirements.txt
+-r requirements-apps-api.txt
 boto3==1.26.3
 cfn-lint==0.71.0
 flake8==5.0.4
