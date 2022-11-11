@@ -51,6 +51,10 @@ RDS console and copying the "Endpoint" field.
 
 ### Running the API locally
 
+You can run the STAC API frontend locally (connected to the AWS-hosted database). This is required for accessing
+the create/update/delete endpoints (which are provided by the STAC API's Transaction extension), as these
+endpoints are disabled for the publicly accessible API.
+
 To run the STAC API locally:
 
 ```
@@ -62,4 +66,5 @@ query the API at that URL.
 
 ### Ingesting STAC dataset
 
-Run `python ingest_data.py -h` for usage instructions.
+Run `python ingest_data.py -h` for usage instructions. The script only works with an API that supports the
+Transaction extension.
