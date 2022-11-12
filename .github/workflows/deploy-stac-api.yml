@@ -6,7 +6,7 @@ on:
       - develop
 
 env:
-  STACK_NAME: stac-api-test
+  STACK_NAME: asf-stac-test
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   CF_TEMPLATES_BUCKET: ${{ secrets.CF_TEMPLATES_BUCKET }}
