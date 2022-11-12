@@ -9,6 +9,12 @@ Parameters:
     Type: String
     NoEcho: true
 
+  SubnetIds:
+    Type: CommaDelimitedList
+
+  SecurityGroupId:
+    Type: AWS::EC2::SecurityGroup::Id
+
 Resources:
   Lambda:
     Type: AWS::Lambda::Function
@@ -27,6 +33,10 @@ Resources:
       Role: !GetAtt LambdaRole.Arn
       Runtime: python3.9
       Timeout: 30
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref SecurityGroupId
+        SubnetIds: !Ref SubnetIds
 
   LambdaLogGroup:
     Type: AWS::Logs::LogGroup
@@ -46,6 +56,7 @@ Resources:
           Effect: Allow
       ManagedPolicyArns:
         - !Ref LambdaPolicy
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
 
   LambdaPolicy:
     Type: AWS::IAM::ManagedPolicy

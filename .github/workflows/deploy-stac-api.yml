@@ -13,6 +13,9 @@ env:
   DB_ADMIN_PASSWORD: ${{ secrets.DB_ADMIN_PASSWORD }}
   DB_READ_PASSWORD: ${{ secrets.DB_READ_PASSWORD }}
   STACK_NAME: stac-api-sandbox
+  VPC_ID: ${{ secrets.VPC_ID }}
+  SUBNET_IDS: ${{ secrets.SUBNET_IDS }}
+  CIDR_IP: ${{ secrets.CIDR_IP }}
 
 jobs:
   deploy-stac-api:
@@ -39,7 +42,11 @@ jobs:
             stack_name=${{ env.STACK_NAME }} \
             cloudformation_role_arn=${{ env.CLOUDFORMATION_ROLE_ARN }} \
             db_admin_password=${{ env.DB_ADMIN_PASSWORD }} \
-            db_read_password=${{ env.DB_READ_PASSWORD }}
+            db_read_password=${{ env.DB_READ_PASSWORD }} \
+            vpc_id=${{ env.VPC_ID }} \
+            subnet_ids=${{ env.SUBNET_IDS }} \
+            cidr_ip=${{ env.CIDR_IP }}
+
       - name: Get database host
         run: |
           echo "DATABASE_HOST=$(aws cloudformation describe-stacks \
