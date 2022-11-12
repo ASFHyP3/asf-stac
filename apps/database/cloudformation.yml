@@ -5,9 +5,18 @@ Parameters:
     Type: String
     NoEcho: true
 
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+
+  CidrIp:
+    Type: String
+
 Outputs:
   DatabaseHost:
     Value: !GetAtt DatabaseInstance.Endpoint.Address
+
+  ClientSecurityGroupId:
+    Value: !Ref ClientSecurityGroup
 
 Resources:
   DatabaseInstance:
@@ -27,10 +36,16 @@ Resources:
       PubliclyAccessible: true
       # TODO: StorageType: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-rds-dbinstance.html#cfn-rds-dbinstance-storagetype
 
-  # TODO only allow incoming connections from within the ASF network and from our Lambda function
   DatabaseSecurityGroup:
     Type: AWS::RDS::DBSecurityGroup
     Properties:
+      GroupDescription: !Sub "Security group for ${AWS::StackName} database"
       DBSecurityGroupIngress:
-        - CIDRIP: 0.0.0.0/0
-      GroupDescription: STAC API database security group.
+        - EC2SecurityGroupId: !Ref ClientSecurityGroup
+        - CIDRIP: !Ref CidrIp
+
+  ClientSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: !Sub "Security group for clients of ${AWS::StackName} database"
+      VpcId: !Ref VpcId
