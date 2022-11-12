@@ -20,7 +20,7 @@ env:
 jobs:
   deploy-stac-api:
     runs-on: ubuntu-latest
-    environment: test
+    environment: ${{ env.STACK_NAME }}
     steps:
       - uses: actions/checkout@v3
       - uses: aws-actions/configure-aws-credentials@v1
