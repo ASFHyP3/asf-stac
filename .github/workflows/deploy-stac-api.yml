@@ -12,7 +12,7 @@ jobs:
       matrix:
         include:
           - environment: asf-stac-test
-            template_bucket: cf-templates-118mtzosmrltk-us-west-2
+            template_bucket: cf-templates-aubvn3i9olmk-us-west-2
 
     environment:
       name: ${{ matrix.environment }}
