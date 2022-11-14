@@ -1,5 +1,6 @@
 """
-Adds a STAC dataset to a STAC API application.
+Adds a STAC dataset to a STAC API application. Skips objects that
+already exist.
 
 Assumes that the dataset is arranged as a tree (connected acyclic
 graph). This means that all objects should be reachable from the root
@@ -43,9 +44,14 @@ def add_stac_object(stac_object: dict, api_url: str) -> None:
     else:
         assert stac_object['type'] == 'Feature'
         endpoint = f'/collections/{stac_object["collection"]}/items'
+
     url = urljoin(api_url, endpoint)
     response = requests.post(url, json=stac_object)
-    response.raise_for_status()
+
+    if response.status_code == 409:
+        print('Skipping existing object')
+    else:
+        response.raise_for_status()
 
 
 def parse_args() -> argparse.Namespace:
