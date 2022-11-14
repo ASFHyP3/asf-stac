@@ -10,6 +10,8 @@ TODO: document creating conda env and installing developer deps
 
 TODO: proofread docs since adding multiple database users
 
+TODO: document database URLs and the `/api.html` endpoint for the Swagger UI
+
 ### Upgrading the database
 
 The initial AWS deployment creates a Postgres database, installs the PostGIS extension, and then installs
