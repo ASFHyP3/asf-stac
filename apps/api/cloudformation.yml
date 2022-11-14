@@ -15,6 +15,12 @@ Parameters:
   SecurityGroupId:
     Type: AWS::EC2::SecurityGroup::Id
 
+  DomainName:
+    Type: String
+
+  CertificateArn:
+    Type: String
+
 Resources:
   Lambda:
     Type: AWS::Lambda::Function
@@ -110,3 +116,18 @@ Resources:
               - Effect: Allow
                 Action: lambda:InvokeFunction
                 Resource: !GetAtt Lambda.Arn
+
+  CustomDomainName:
+    Type: AWS::ApiGatewayV2::DomainName
+    Properties:
+      DomainName: !Ref DomainName
+      DomainNameConfigurations:
+        - CertificateArn: !Ref CertificateArn
+          EndpointType: REGIONAL
+
+  ApiMapping:
+    Type: AWS::ApiGatewayV2::ApiMapping
+    Properties:
+      ApiId: !Ref Api
+      DomainName: !Ref CustomDomainName
+      Stage: $default
