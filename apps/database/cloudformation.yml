@@ -1,0 +1,51 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Parameters:
+  DatabaseAdminPassword:
+    Type: String
+    NoEcho: true
+
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+
+  CidrIp:
+    Type: String
+
+Outputs:
+  DatabaseHost:
+    Value: !GetAtt DatabaseInstance.Endpoint.Address
+
+  ClientSecurityGroupId:
+    Value: !Ref ClientSecurityGroup
+
+Resources:
+  DatabaseInstance:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      AllocatedStorage: '20' # TODO depends on StorageType?
+      DBInstanceClass: 'db.t3.micro' # TODO different class for prod?
+      DBSecurityGroups:
+        - !Ref DatabaseSecurityGroup
+      Engine: postgres
+      EngineVersion: '14.4'
+      MasterUsername: postgres
+      MasterUserPassword: !Ref DatabaseAdminPassword
+      # TODO: MaxAllocatedStorage: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-rds-dbinstance.html#cfn-rds-dbinstance-maxallocatedstorage
+      Port: '5432'
+      # TODO: ProcessorFeatures: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-rds-dbinstance.html#cfn-rds-dbinstance-processorfeatures
+      PubliclyAccessible: true
+      # TODO: StorageType: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-rds-dbinstance.html#cfn-rds-dbinstance-storagetype
+
+  DatabaseSecurityGroup:
+    Type: AWS::RDS::DBSecurityGroup
+    Properties:
+      GroupDescription: !Sub "Security group for ${AWS::StackName} database"
+      DBSecurityGroupIngress:
+        - EC2SecurityGroupId: !Ref ClientSecurityGroup
+        - CIDRIP: !Ref CidrIp
+
+  ClientSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: !Sub "Security group for clients of ${AWS::StackName} database"
+      VpcId: !Ref VpcId
