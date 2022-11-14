@@ -8,10 +8,11 @@ on:
 jobs:
   deploy-stac-api:
     runs-on: ubuntu-latest
-    matrix:
-      include:
-        - environment: asf-stac-test
-          template_bucket: cf-templates-118ylv0o6jp2n-us-west-2
+    strategy:
+      matrix:
+        include:
+          - environment: asf-stac-test
+            template_bucket: cf-templates-118ylv0o6jp2n-us-west-2
 
     environment:
       name: ${{ matrix.environment }}
