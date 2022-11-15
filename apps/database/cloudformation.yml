@@ -1,19 +1,27 @@
 AWSTemplateFormatVersion: 2010-09-09
 
 Parameters:
+
   DatabaseAdminPassword:
+    Type: String
+    NoEcho: true
+
+  DatabaseReadPassword:
     Type: String
     NoEcho: true
 
   VpcId:
     Type: AWS::EC2::VPC::Id
 
+  SubnetIds:
+    Type: CommaDelimitedList
+
   CidrIp:
     Type: String
 
 Outputs:
-  DatabaseHost:
-    Value: !GetAtt DatabaseInstance.Endpoint.Address
+  BuildProject:
+    Value: !Ref CodeBuildProject
 
   ClientSecurityGroupId:
     Value: !Ref ClientSecurityGroup
@@ -49,3 +57,86 @@ Resources:
     Properties:
       GroupDescription: !Sub "Security group for clients of ${AWS::StackName} database"
       VpcId: !Ref VpcId
+
+  DatabaseSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Description: !Sub "${AWS::StackName} database credentials"
+      SecretString: !Sub '{"database_host": "${DatabaseInstance.Endpoint.Address}", "admin_user": "postgres", "admin_password": "${DatabaseAdminPassword}", "read_user": "pgstac_read", "read_password": "${DatabaseReadPassword}"}'
+
+  CodeBuildProject:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Type: LINUX_CONTAINER
+        Image: 	aws/codebuild/standard:6.0
+        EnvironmentVariables:
+          - Name: PGHOST
+            Type: SECRETS_MANAGER
+            Value: !Sub "${DatabaseSecret}:database_host"
+          - Name: PGUSER
+            Type: SECRETS_MANAGER
+            Value: !Sub "${DatabaseSecret}:admin_user"
+          - Name: PGPASSWORD
+            Type: SECRETS_MANAGER
+            Value: !Sub "${DatabaseSecret}:admin_password"
+#      LogsConfig:
+      ServiceRole: !Ref CodeBuildServiceRole
+      Source:
+        Type: GITHUB
+        Location: https://github.com/ASFHyP3/asf-stac.git
+        BuildSpec: make cfn-lint
+      SourceVersion: develop
+      Artifacts:
+        Type: NO_ARTIFACTS
+      VpcConfig:
+        VpcId: !Ref VpcId
+        Subnets: !Ref SubnetIds
+        SecurityGroupIds:
+          - !Ref ClientSecurityGroup
+
+  CodeBuildServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          Action: sts:AssumeRole
+          Principal:
+            Service: codebuild.amazonaws.com
+          Effect: Allow
+      Policies:
+        - PolicyName: policy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Sid: CloudWatchLogsPolicy
+                Effect: Allow
+                Action:
+                - logs:CreateLogGroup
+                - logs:CreateLogStream
+                - logs:PutLogEvents
+                Resource: "*"
+              - Sid: CodeCommitPolicy
+                Effect: Allow
+                Action:
+                - codecommit:GitPull
+                Resource: "*"
+              - Sid: S3GetObjectPolicy
+                Effect: Allow
+                Action:
+                - s3:GetObject
+                - s3:GetObjectVersion
+                Resource: "*"
+              - Sid: S3PutObjectPolicy
+                Effect: Allow
+                Action:
+                - s3:PutObject
+                Resource: "*"
+              - Sid: S3BucketIdentity
+                Effect: Allow
+                Action:
+                - s3:GetBucketAcl
+                - s3:GetBucketLocation
+                Resource: "*"

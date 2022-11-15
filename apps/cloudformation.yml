@@ -19,8 +19,8 @@ Parameters:
     NoEcho: true
 
 Outputs:
-  DatabaseHost:
-    Value: !GetAtt Database.Outputs.DatabaseHost
+  BuildProject:
+    Value: !GetAtt Database.Outputs.BuildProject
 
 Resources:
   Api:
@@ -38,12 +38,8 @@ Resources:
     Properties:
       Parameters:
         DatabaseAdminPassword: !Ref DatabaseAdminPassword
+        DatabaseReadPassword: !Ref DatabaseReadPassword
         VpcId: !Ref VpcId
+        SubnetIds: !Join [",", !Ref SubnetIds]
         CidrIp: !Ref CidrIp
       TemplateURL: database/cloudformation.yml
-
-  DatabaseSecret:
-    Type: AWS::SecretsManager::Secret
-    Properties:
-      Description: !Sub "${AWS::StackName} database credentials"
-      SecretString: !Sub '{"database_host": "${Database.Outputs.DatabaseHost}", "admin_user": "postgres", "admin_password": "${DatabaseAdminPassword}", "read_user": "pgstac_read", "read_password": "${DatabaseReadPassword}"}'
