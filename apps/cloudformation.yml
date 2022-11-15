@@ -18,6 +18,12 @@ Parameters:
     Type: String
     NoEcho: true
 
+  DomainName:
+    Type: String
+
+  CertificateArn:
+    Type: String
+
 Outputs:
   DatabaseHost:
     Value: !GetAtt Database.Outputs.DatabaseHost
@@ -31,6 +37,8 @@ Resources:
         DatabaseReadPassword: !Ref DatabaseReadPassword
         SecurityGroupId: !GetAtt Database.Outputs.ClientSecurityGroupId
         SubnetIds: !Join [",", !Ref SubnetIds]
+        DomainName: !Ref DomainName
+        CertificateArn: !Ref CertificateArn
       TemplateURL: api/cloudformation.yml
 
   Database:
