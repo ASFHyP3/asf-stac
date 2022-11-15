@@ -30,17 +30,19 @@ deploy:
 psql:
 	PGHOST=${db_host} PGPORT=5432 PGDATABASE=postgres PGUSER=${db_user} PGPASSWORD=${db_password} psql
 
+configure-database: install-or-upgrade-postgis pypgstac-migrate configure-database-roles
+
 install-or-upgrade-postgis:
 	PGHOST=${db_host} PGPORT=5432 PGDATABASE=postgres PGUSER=postgres PGPASSWORD=${db_admin_password} psql \
 	    -f install-or-upgrade-postgis.sql
+
+pypgstac-migrate:
+	PGHOST=${db_host} PGPORT=5432 PGDATABASE=postgres PGUSER=postgres PGPASSWORD=${db_admin_password} pypgstac migrate
 
 configure-database-roles:
 	PGHOST=${db_host} PGPORT=5432 PGDATABASE=postgres PGUSER=postgres PGPASSWORD=${db_admin_password} psql \
 	    --set=db_read_password=${db_read_password} \
 	    -f configure-database-roles.sql
-
-pypgstac-migrate:
-	PGHOST=${db_host} PGPORT=5432 PGDATABASE=postgres PGUSER=postgres PGPASSWORD=${db_admin_password} pypgstac migrate
 
 run-api:
 	POSTGRES_HOST_READER=${db_host} POSTGRES_HOST_WRITER=${db_host} POSTGRES_PORT=5432 \
