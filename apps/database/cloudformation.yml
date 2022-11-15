@@ -70,7 +70,7 @@ Resources:
       Environment:
         ComputeType: BUILD_GENERAL1_SMALL
         Type: LINUX_CONTAINER
-        Image: 	aws/codebuild/standard:6.0
+        Image: aws/codebuild/standard:6.0
         EnvironmentVariables:
           - Name: PGHOST
             Type: SECRETS_MANAGER
@@ -86,6 +86,7 @@ Resources:
       Source:
         Type: GITHUB
         Location: https://github.com/ASFHyP3/asf-stac.git
+        GitCloneDepth: 1
         BuildSpec: make cfn-lint
       SourceVersion: develop
       Artifacts:
@@ -111,32 +112,30 @@ Resources:
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
-              - Sid: CloudWatchLogsPolicy
-                Effect: Allow
+              - Effect: Allow
                 Action:
-                - logs:CreateLogGroup
-                - logs:CreateLogStream
-                - logs:PutLogEvents
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                  - codecommit:GitPull
+                  - s3:GetObject
+                  - s3:GetObjectVersion
+                  - s3:PutObject
+                  - s3:GetBucketAcl
+                  - s3:GetBucketLocation
+                  - ec2:CreateNetworkInterface
+                  - ec2:DescribeDhcpOptions
+                  - ec2:DescribeNetworkInterfaces
+                  - ec2:DeleteNetworkInterface
+                  - ec2:DescribeSubnets
+                  - ec2:DescribeSecurityGroups
+                  - ec2:DescribeVpcs
                 Resource: "*"
-              - Sid: CodeCommitPolicy
-                Effect: Allow
-                Action:
-                - codecommit:GitPull
-                Resource: "*"
-              - Sid: S3GetObjectPolicy
-                Effect: Allow
-                Action:
-                - s3:GetObject
-                - s3:GetObjectVersion
-                Resource: "*"
-              - Sid: S3PutObjectPolicy
-                Effect: Allow
-                Action:
-                - s3:PutObject
-                Resource: "*"
-              - Sid: S3BucketIdentity
-                Effect: Allow
-                Action:
-                - s3:GetBucketAcl
-                - s3:GetBucketLocation
-                Resource: "*"
+              - Effect: Allow
+                Action: ec2:CreateNetworkInterfacePermission
+                Resource: !Sub "arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:network-interface/*"
+                Condition:
+                  StringEquals:
+                    ec2:AuthorizedService: codebuild.amazonaws.com
+                  StringLike:
+                    ec2:Subnet: !Sub "arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:subnet/*"
