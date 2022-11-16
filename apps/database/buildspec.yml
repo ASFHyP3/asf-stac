@@ -8,17 +8,7 @@ phases:
       - apt update
       - apt install -y postgresql-12
       - make install-pypgstac
+      - pyenv rehash
   build:
     commands:
-      - which python
-      - which pip
-      - python --version
-      - pip --version
-      - which pip3
-      - pip3 --version
-      - echo $PYTHONPATH
-      - echo $PATH
-      - ls -l /root/.pyenv/bin
-      - find /root/.pyenv/ -name pypgstac
-      - pyenv rehash
       - make configure-database db_host=$PGHOST db_admin_password=$PGPASSWORD db_read_password=$READ_PASSWORD
