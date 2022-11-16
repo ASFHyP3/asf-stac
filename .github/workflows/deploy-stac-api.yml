@@ -13,6 +13,7 @@ jobs:
         include:
           - environment: asf-stac-test
             template_bucket: cf-templates-aubvn3i9olmk-us-west-2
+            github_branch: develop
 
     environment:
       name: ${{ matrix.environment }}
@@ -41,7 +42,8 @@ jobs:
             db_read_password=${{ secrets.DB_READ_PASSWORD }} \
             vpc_id=${{ secrets.VPC_ID }} \
             subnet_ids=${{ secrets.SUBNET_IDS }} \
-            cidr_ip=${{ secrets.CIDR_IP }}
+            cidr_ip=${{ secrets.CIDR_IP }} \
+            github_branch=${{ matrix.github_branch }}
       - name: Get CodeBuild project
         run: |
           echo "CODEBUILD_PROJECT=$(aws cloudformation describe-stacks \
