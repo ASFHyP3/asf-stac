@@ -25,7 +25,8 @@ deploy:
 	      DatabaseReadPassword=${db_read_password} \
 	      VpcId=${vpc_id} \
 	      SubnetIds=${subnet_ids} \
-	      CidrIp=${cidr_ip}
+	      CidrIp=${cidr_ip} \
+	      GithubBranch=${github_branch}
 
 psql:
 	PGHOST=${db_host} PGPORT=5432 PGDATABASE=postgres PGUSER=${db_user} PGPASSWORD=${db_password} psql
