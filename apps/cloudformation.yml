@@ -47,7 +47,7 @@ Resources:
         DatabaseAdminPassword: !Ref DatabaseAdminPassword
         DatabaseReadPassword: !Ref DatabaseReadPassword
         VpcId: !GetAtt VPC.Outputs.VPC
-        PublicSubnetIds: !GetAtt VPC.Outputs.PrivateSubnets
+        PublicSubnetIds: !GetAtt VPC.Outputs.PublicSubnets
         PrivateSubnetIds: !GetAtt VPC.Outputs.PrivateSubnets
         CidrIp: !Ref CidrIp
         GithubBranch: !Ref GithubBranch
