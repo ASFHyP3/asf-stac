@@ -18,4 +18,6 @@ phases:
       - pip3 --version
       - echo $PYTHONPATH
       - echo $PATH
+      - ls -l /root/.pyenv/bin
+      - find / -name pypgstac
       - make configure-database db_host=$PGHOST db_admin_password=$PGPASSWORD db_read_password=$READ_PASSWORD
