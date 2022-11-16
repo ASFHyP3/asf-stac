@@ -51,4 +51,4 @@ jobs:
                                     --query 'Stacks[0].Outputs[?OutputKey==`BuildProject`].OutputValue' \
                                     --output text)" >> $GITHUB_ENV
       - name: Run CodeBuild
-        run: aws codebuild start-build --project-name $CODEBUILD_PROJECT
+        run: python run_codebuild.py
