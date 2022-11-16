@@ -19,5 +19,6 @@ phases:
       - echo $PYTHONPATH
       - echo $PATH
       - ls -l /root/.pyenv/bin
-      - find / -name pypgstac
+      - find /root/.pyenv/ -name pypgstac
+      - pyenv rehash
       - make configure-database db_host=$PGHOST db_admin_password=$PGPASSWORD db_read_password=$READ_PASSWORD
