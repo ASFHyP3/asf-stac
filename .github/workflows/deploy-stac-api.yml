@@ -49,4 +49,4 @@ jobs:
                                     --query 'Stacks[0].Outputs[?OutputKey==`BuildProject`].OutputValue' \
                                     --output text)" >> $GITHUB_ENV
       - name: Run CodeBuild
-        run: python wait_for_codebuild.py
+        run: python run_codebuild.py
