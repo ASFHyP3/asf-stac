@@ -106,7 +106,6 @@ Resources:
           - Name: READ_PASSWORD
             Type: SECRETS_MANAGER
             Value: !Sub "${DatabaseSecret}:read_password"
-#      LogsConfig:
       ServiceRole: !Ref CodeBuildServiceRole
       Source:
         Type: GITHUB
@@ -121,6 +120,12 @@ Resources:
         Subnets: !Ref PrivateSubnetIds
         SecurityGroupIds:
           - !Ref ClientSecurityGroup
+
+  CodeBuildLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/codebuild/${CodeBuildProject}"
+      RetentionInDays: 90
 
   CodeBuildServiceRole:
     Type: AWS::IAM::Role
@@ -142,12 +147,9 @@ Resources:
                   - logs:CreateLogGroup
                   - logs:CreateLogStream
                   - logs:PutLogEvents
-                  - codecommit:GitPull
-                  - s3:GetObject
-                  - s3:GetObjectVersion
-                  - s3:PutObject
-                  - s3:GetBucketAcl
-                  - s3:GetBucketLocation
+                Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/*"
+              - Effect: Allow
+                Action:
                   - ec2:CreateNetworkInterface
                   - ec2:DescribeDhcpOptions
                   - ec2:DescribeNetworkInterfaces
