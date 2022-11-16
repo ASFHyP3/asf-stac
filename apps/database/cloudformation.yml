@@ -103,6 +103,9 @@ Resources:
           - Name: PGPASSWORD
             Type: SECRETS_MANAGER
             Value: !Sub "${DatabaseSecret}:admin_password"
+          - Name: READ_PASSWORD
+            Type: SECRETS_MANAGER
+            Value: !Sub "${DatabaseSecret}:read_password"
 #      LogsConfig:
       ServiceRole: !Ref CodeBuildServiceRole
       Source:
