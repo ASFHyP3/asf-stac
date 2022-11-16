@@ -1,6 +1,7 @@
 AWSTemplateFormatVersion: 2010-09-09
 
 Parameters:
+
   DatabaseHost:
     Type: String
     NoEcho: true
@@ -9,8 +10,8 @@ Parameters:
     Type: String
     NoEcho: true
 
-  SubnetIds:
-    Type: CommaDelimitedList
+  SubnetId:
+    Type: AWS::EC2::Subnet::Id
 
   SecurityGroupId:
     Type: AWS::EC2::SecurityGroup::Id
@@ -36,7 +37,8 @@ Resources:
       VpcConfig:
         SecurityGroupIds:
           - !Ref SecurityGroupId
-        SubnetIds: !Ref SubnetIds
+        SubnetIds:
+          - !Ref SubnetId
 
   LambdaLogGroup:
     Type: AWS::Logs::LogGroup

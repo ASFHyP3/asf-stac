@@ -13,8 +13,8 @@ Parameters:
   VpcId:
     Type: AWS::EC2::VPC::Id
 
-  SubnetIds:
-    Type: CommaDelimitedList
+  SubnetId:
+    Type: AWS::EC2::Subnet::Id
 
   CidrIp:
     Type: String
@@ -27,11 +27,12 @@ Outputs:
     Value: !Ref ClientSecurityGroup
 
 Resources:
+
   DatabaseInstance:
     Type: AWS::RDS::DBInstance
     Properties:
       AllocatedStorage: '20' # TODO depends on StorageType?
-      DBInstanceClass: 'db.t3.micro' # TODO different class for prod?
+      DBInstanceClass: db.t3.micro # TODO different class for prod?
       DBSecurityGroups:
         - !Ref DatabaseSecurityGroup
       Engine: postgres
@@ -93,7 +94,8 @@ Resources:
         Type: NO_ARTIFACTS
       VpcConfig:
         VpcId: !Ref VpcId
-        Subnets: !Ref SubnetIds
+        Subnets:
+          - !Ref SubnetId
         SecurityGroupIds:
           - !Ref ClientSecurityGroup
 

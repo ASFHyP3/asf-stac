@@ -1,11 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 
 Parameters:
-  VpcId:
-    Type: AWS::EC2::VPC::Id
-
-  SubnetIds:
-    Type: List<AWS::EC2::Subnet::Id>
 
   CidrIp:
     Type: String
@@ -19,10 +14,17 @@ Parameters:
     NoEcho: true
 
 Outputs:
+
   BuildProject:
     Value: !GetAtt Database.Outputs.BuildProject
 
 Resources:
+
+  VPC:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: vpc/cloudformation.yml
+
   Api:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -30,7 +32,7 @@ Resources:
         DatabaseHost: !GetAtt Database.Outputs.DatabaseHost
         DatabaseReadPassword: !Ref DatabaseReadPassword
         SecurityGroupId: !GetAtt Database.Outputs.ClientSecurityGroupId
-        SubnetIds: !Join [",", !Ref SubnetIds]
+        SubnetId: !GetAtt VPC.Outputs.PrivateSubnetId
       TemplateURL: api/cloudformation.yml
 
   Database:
@@ -39,7 +41,7 @@ Resources:
       Parameters:
         DatabaseAdminPassword: !Ref DatabaseAdminPassword
         DatabaseReadPassword: !Ref DatabaseReadPassword
-        VpcId: !Ref VpcId
-        SubnetIds: !Join [",", !Ref SubnetIds]
+        VpcId: !GetAtt VPC.Outputs.VpcId
+        SubnetId: !GetAtt VPC.Outputs.PrivateSubnetId
         CidrIp: !Ref CidrIp
       TemplateURL: database/cloudformation.yml
