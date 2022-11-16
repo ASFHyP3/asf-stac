@@ -97,9 +97,6 @@ Resources:
           - Name: PGHOST
             Type: SECRETS_MANAGER
             Value: !Sub "${DatabaseSecret}:database_host"
-          - Name: PGUSER
-            Type: SECRETS_MANAGER
-            Value: !Sub "${DatabaseSecret}:admin_user"
           - Name: PGPASSWORD
             Type: SECRETS_MANAGER
             Value: !Sub "${DatabaseSecret}:admin_password"

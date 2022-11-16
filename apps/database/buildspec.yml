@@ -9,4 +9,4 @@ phases:
       - apt install -y postgresql-12
   build:
     commands:
-      - make configure-database db_host=$DBHOST db_admin_password=$PGPASSWORD db_read_password=$READ_PASSWORD
+      - make configure-database db_host=$PGHOST db_admin_password=$PGPASSWORD db_read_password=$READ_PASSWORD
