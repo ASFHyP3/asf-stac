@@ -10,4 +10,12 @@ phases:
       - make install-pypgstac
   build:
     commands:
+      - which python
+      - which pip
+      - python --version
+      - pip --version
+      - which pip3
+      - pip3 --version
+      - echo $PYTHONPATH
+      - echo $PATH
       - make configure-database db_host=$PGHOST db_admin_password=$PGPASSWORD db_read_password=$READ_PASSWORD
