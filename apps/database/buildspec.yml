@@ -6,7 +6,7 @@ phases:
       python: 3.9
     commands:
       - apt update
-      - apt install postgresql-12
+      - apt install -y postgresql-12
   build:
     commands:
       - make configure-database

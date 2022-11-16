@@ -19,6 +19,9 @@ Parameters:
   CidrIp:
     Type: String
 
+  GithubBranch:
+    Type: String
+
 Outputs:
 
   BuildProject:
@@ -107,7 +110,7 @@ Resources:
         Location: https://github.com/ASFHyP3/asf-stac.git
         GitCloneDepth: 1
         BuildSpec: apps/database/buildspec.yml
-      SourceVersion: develop
+      SourceVersion: !Ref GithubBranch
       Artifacts:
         Type: NO_ARTIFACTS
       VpcConfig:
@@ -150,6 +153,9 @@ Resources:
                   - ec2:DescribeSecurityGroups
                   - ec2:DescribeVpcs
                 Resource: "*"
+              - Effect: Allow
+                Action: secretsmanager:GetSecretValue
+                Resource: !Ref DatabaseSecret
               - Effect: Allow
                 Action: ec2:CreateNetworkInterfacePermission
                 Resource: !Sub "arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:network-interface/*"

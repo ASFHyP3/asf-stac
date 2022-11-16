@@ -2,6 +2,9 @@ AWSTemplateFormatVersion: 2010-09-09
 
 Parameters:
 
+  GithubBranch:
+    Type: String
+
   CidrIp:
     Type: String
 
@@ -46,4 +49,5 @@ Resources:
         VpcId: !GetAtt VPC.Outputs.VPC
         SubnetIds: !GetAtt VPC.Outputs.PrivateSubnets
         CidrIp: !Ref CidrIp
+        GithubBranch: !Ref GithubBranch
       TemplateURL: database/cloudformation.yml
