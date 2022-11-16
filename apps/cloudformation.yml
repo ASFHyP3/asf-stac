@@ -37,7 +37,7 @@ Resources:
         DatabaseHost: !GetAtt Database.Outputs.DatabaseHost
         DatabaseReadPassword: !Ref DatabaseReadPassword
         SecurityGroupId: !GetAtt Database.Outputs.ClientSecurityGroupId
-        SubnetIds: !GetAtt VPC.Outputs.PrivateSubnets
+        SubnetIds: !GetAtt VPC.Outputs.PublicSubnets
       TemplateURL: api/cloudformation.yml
 
   Database:
@@ -47,7 +47,8 @@ Resources:
         DatabaseAdminPassword: !Ref DatabaseAdminPassword
         DatabaseReadPassword: !Ref DatabaseReadPassword
         VpcId: !GetAtt VPC.Outputs.VPC
-        SubnetIds: !GetAtt VPC.Outputs.PrivateSubnets
+        PublicSubnetIds: !GetAtt VPC.Outputs.PrivateSubnets
+        PrivateSubnetIds: !GetAtt VPC.Outputs.PrivateSubnets
         CidrIp: !Ref CidrIp
         GithubBranch: !Ref GithubBranch
       TemplateURL: database/cloudformation.yml

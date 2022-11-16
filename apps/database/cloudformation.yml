@@ -13,7 +13,10 @@ Parameters:
   VpcId:
     Type: AWS::EC2::VPC::Id
 
-  SubnetIds:
+  PublicSubnetIds:
+    Type: CommaDelimitedList
+
+  PrivateSubnetIds:
     Type: CommaDelimitedList
 
   CidrIp:
@@ -57,7 +60,7 @@ Resources:
     Type: AWS::RDS::DBSubnetGroup
     Properties:
       DBSubnetGroupDescription: !Sub "Subnet Group for ${AWS::StackName} database"
-      SubnetIds: !Ref SubnetIds
+      SubnetIds: !Ref PublicSubnetIds
 
   DatabaseSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -115,7 +118,7 @@ Resources:
         Type: NO_ARTIFACTS
       VpcConfig:
         VpcId: !Ref VpcId
-        Subnets: !Ref SubnetIds
+        Subnets: !Ref PrivateSubnetIds
         SecurityGroupIds:
           - !Ref ClientSecurityGroup
 
