@@ -13,18 +13,22 @@ Parameters:
   VpcId:
     Type: AWS::EC2::VPC::Id
 
-  SubnetId:
-    Type: AWS::EC2::Subnet::Id
+  SubnetIds:
+    Type: CommaDelimitedList
 
   CidrIp:
     Type: String
 
 Outputs:
+
   BuildProject:
     Value: !Ref CodeBuildProject
 
   ClientSecurityGroupId:
     Value: !Ref ClientSecurityGroup
+
+  DatabaseHost:
+    Value: !GetAtt DatabaseInstance.Endpoint.Address
 
 Resources:
 
@@ -33,7 +37,8 @@ Resources:
     Properties:
       AllocatedStorage: '20' # TODO depends on StorageType?
       DBInstanceClass: db.t3.micro # TODO different class for prod?
-      DBSecurityGroups:
+      DBSubnetGroupName: !Ref DatabaseSubnetGroup
+      VPCSecurityGroups:
         - !Ref DatabaseSecurityGroup
       Engine: postgres
       EngineVersion: '14.4'
@@ -45,13 +50,26 @@ Resources:
       PubliclyAccessible: true
       # TODO: StorageType: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-rds-dbinstance.html#cfn-rds-dbinstance-storagetype
 
-  DatabaseSecurityGroup:
-    Type: AWS::RDS::DBSecurityGroup
+  DatabaseSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
     Properties:
-      GroupDescription: !Sub "Security group for ${AWS::StackName} database"
-      DBSecurityGroupIngress:
-        - EC2SecurityGroupId: !Ref ClientSecurityGroup
-        - CIDRIP: !Ref CidrIp
+      DBSubnetGroupDescription: !Sub "Subnet Group for ${AWS::StackName} database"
+      SubnetIds: !Ref SubnetIds
+
+  DatabaseSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: !Sub "Security group for clients of ${AWS::StackName} database"
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          CidrIp: !Ref CidrIp
+          FromPort: 5432
+          ToPort: 5432
+        - IpProtocol: tcp
+          SourceSecurityGroupId: !Ref ClientSecurityGroup
+          FromPort: 5432
+          ToPort: 5432
 
   ClientSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -71,7 +89,7 @@ Resources:
       Environment:
         ComputeType: BUILD_GENERAL1_SMALL
         Type: LINUX_CONTAINER
-        Image: aws/codebuild/standard:6.0
+        Image: aws/codebuild/standard:5.0
         EnvironmentVariables:
           - Name: PGHOST
             Type: SECRETS_MANAGER
@@ -88,14 +106,13 @@ Resources:
         Type: GITHUB
         Location: https://github.com/ASFHyP3/asf-stac.git
         GitCloneDepth: 1
-        BuildSpec: make cfn-lint
+        BuildSpec: apps/database/buildspec.yml
       SourceVersion: develop
       Artifacts:
         Type: NO_ARTIFACTS
       VpcConfig:
         VpcId: !Ref VpcId
-        Subnets:
-          - !Ref SubnetId
+        Subnets: !Ref SubnetIds
         SecurityGroupIds:
           - !Ref ClientSecurityGroup
 

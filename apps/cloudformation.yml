@@ -23,6 +23,8 @@ Resources:
   VPC:
     Type: AWS::CloudFormation::Stack
     Properties:
+      Parameters:
+        EnvironmentName: !Ref AWS::StackName
       TemplateURL: vpc/cloudformation.yml
 
   Api:
@@ -32,7 +34,7 @@ Resources:
         DatabaseHost: !GetAtt Database.Outputs.DatabaseHost
         DatabaseReadPassword: !Ref DatabaseReadPassword
         SecurityGroupId: !GetAtt Database.Outputs.ClientSecurityGroupId
-        SubnetId: !GetAtt VPC.Outputs.PrivateSubnetId
+        SubnetIds: !GetAtt VPC.Outputs.PrivateSubnets
       TemplateURL: api/cloudformation.yml
 
   Database:
@@ -41,7 +43,7 @@ Resources:
       Parameters:
         DatabaseAdminPassword: !Ref DatabaseAdminPassword
         DatabaseReadPassword: !Ref DatabaseReadPassword
-        VpcId: !GetAtt VPC.Outputs.VpcId
-        SubnetId: !GetAtt VPC.Outputs.PrivateSubnetId
+        VpcId: !GetAtt VPC.Outputs.VPC
+        SubnetIds: !GetAtt VPC.Outputs.PrivateSubnets
         CidrIp: !Ref CidrIp
       TemplateURL: database/cloudformation.yml

@@ -10,8 +10,8 @@ Parameters:
     Type: String
     NoEcho: true
 
-  SubnetId:
-    Type: AWS::EC2::Subnet::Id
+  SubnetIds:
+    Type: CommaDelimitedList
 
   SecurityGroupId:
     Type: AWS::EC2::SecurityGroup::Id
@@ -37,8 +37,7 @@ Resources:
       VpcConfig:
         SecurityGroupIds:
           - !Ref SecurityGroupId
-        SubnetIds:
-          - !Ref SubnetId
+        SubnetIds: !Ref SubnetIds
 
   LambdaLogGroup:
     Type: AWS::Logs::LogGroup
