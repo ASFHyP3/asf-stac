@@ -65,7 +65,7 @@ Resources:
   DatabaseSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: !Sub "Security group for clients of ${AWS::StackName} database"
+      GroupDescription: !Sub "Security group for ${AWS::StackName} database"
       VpcId: !Ref VpcId
       SecurityGroupIngress:
         - IpProtocol: tcp
