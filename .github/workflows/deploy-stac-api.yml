@@ -14,6 +14,7 @@ jobs:
           - environment: asf-stac-test
             template_bucket: cf-templates-aubvn3i9olmk-us-west-2
             github_branch: develop
+            domain_name: stac-test.asf.alaska.edu
 
     environment:
       name: ${{ matrix.environment }}
@@ -25,7 +26,7 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-west-2
-      - uses: actions/setup-python@v3
+      - uses: actions/setup-python@v4
         with:
           python-version: 3.9
       - name: Install Lambda dependencies
@@ -43,7 +44,9 @@ jobs:
             vpc_id=${{ secrets.VPC_ID }} \
             subnet_ids=${{ secrets.SUBNET_IDS }} \
             cidr_ip=${{ secrets.CIDR_IP }} \
-            github_branch=${{ matrix.github_branch }}
+            github_branch=${{ matrix.github_branch }} \
+            domain_name=${{ matrix.domain_name }} \
+            certificate_arn=${{ secrets.CERTIFICATE_ARN }}
       - name: Get CodeBuild project
         run: |
           echo "CODEBUILD_PROJECT=$(aws cloudformation describe-stacks \

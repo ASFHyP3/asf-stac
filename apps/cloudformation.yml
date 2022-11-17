@@ -16,6 +16,12 @@ Parameters:
     Type: String
     NoEcho: true
 
+  DomainName:
+    Type: String
+
+  CertificateArn:
+    Type: String
+
 Outputs:
 
   BuildProject:
@@ -38,6 +44,8 @@ Resources:
         DatabaseReadPassword: !Ref DatabaseReadPassword
         SecurityGroupId: !GetAtt Database.Outputs.ClientSecurityGroupId
         SubnetIds: !GetAtt VPC.Outputs.PublicSubnets
+        DomainName: !Ref DomainName
+        CertificateArn: !Ref CertificateArn
       TemplateURL: api/cloudformation.yml
 
   Database:

@@ -26,7 +26,9 @@ deploy:
 	      VpcId=${vpc_id} \
 	      SubnetIds=${subnet_ids} \
 	      CidrIp=${cidr_ip} \
-	      GithubBranch=${github_branch}
+	      GithubBranch=${github_branch} \
+	      DomainName=${domain_name} \
+	      CertificateArn=${certificate_arn}
 
 psql:
 	PGHOST=${db_host} PGPORT=5432 PGDATABASE=postgres PGUSER=${db_user} PGPASSWORD=${db_password} psql
