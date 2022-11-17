@@ -31,8 +31,6 @@ jobs:
           python-version: 3.9
       - name: Install Lambda dependencies
         run: make -s install-lambda-deps
-      - name: Install pyPgSTAC
-        run: make -s install-pypgstac
       - name: Deploy CloudFormation stack
         run: |
           make -s deploy \
