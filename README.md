@@ -1,16 +1,44 @@
 # asf-stac
 
-A repository containing code related to the creation and hosting of STAC catalogs by the ASF tools team.
+A repository containing code related to the creation and hosting of STAC catalogs by the ASF Tools team.
 
 ## Developer setup
 
-TODO: document creating conda env and installing developer deps
+Create the environment and install developer dependencies:
+
+```
+conda create -n asf-stac python=3.9
+conda activate asf-stac
+make install
+```
 
 ## STAC API
 
-TODO: proofread docs since adding multiple database users
+The test API is available at <https://stac-test.asf.alaska.edu>
+and the Swagger UI is available at <https://stac-test.asf.alaska.edu/api.html>.
 
-TODO: document database URLs and the `/api.html` endpoint for the Swagger UI
+TODO: document prod URL
+
+### Running the API locally
+
+You can run the STAC API frontend locally (connected to the AWS-hosted database). This is required for accessing
+the create/update/delete endpoints (which are provided by the STAC API's Transaction extension), as these
+endpoints are disabled for the publicly accessible API.
+
+Confirm that you're working from a machine with access to the database.
+See [Connecting to the database](#connecting-to-the-database) for exact requirements. Then run:
+
+```
+make run-api db_host=<host> db_admin_password=<password>
+```
+
+You should see something like `Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)` in the output; you can
+query the API at that URL.
+
+### Ingesting a STAC dataset
+
+Run `python ingest_data.py -h` for usage instructions. The script only works with an API that supports the
+Transaction extension. See [Running the API locally](#running-the-api-locally).
 
 ### Upgrading the database
 
@@ -36,16 +64,16 @@ The initial AWS deployment creates a Postgres database, installs the PostGIS ext
 
 5. Deploy to AWS.
 
-PgSTAC upgrades are handled automatically: the [deployment workflow](.github/workflows/deploy-stac-api.yml)
-migrates the database to the installed version of `pypgstac`. See <https://stac-utils.github.io/pgstac/pypgstac>
-for more information about migrations.
-
-### Retrieving database connection details
-
-The database host and database user credentials are available via the AWS Secrets Manager console
-in the AWS account where the CloudFormation stack was deployed.
+PgSTAC upgrades are handled automatically: the deployment pipeline migrates the database to the installed
+version of `pypgstac`. See <https://stac-utils.github.io/pgstac/pypgstac> for more information about migrations.
 
 ### Connecting to the database
+
+We shouldn't need to manually connect to the database, but we can if we need to.
+
+The database only accepts connections from within the ASF network or from clients
+with the client security group attached. See the ingress rules for the database security group in the
+[database CloudFormation template](apps/database/cloudformation.yml).
 
 Confirm you have the `psql` command installed, then run:
 
@@ -53,22 +81,5 @@ Confirm you have the `psql` command installed, then run:
 make psql db_host=<host> db_user=<user> db_password=<password>
 ```
 
-### Running the API locally
-
-You can run the STAC API frontend locally (connected to the AWS-hosted database). This is required for accessing
-the create/update/delete endpoints (which are provided by the STAC API's Transaction extension), as these
-endpoints are disabled for the publicly accessible API.
-
-To run the STAC API locally:
-
-```
-make run-api db_host=<host> db_admin_password=<password>
-```
-
-You should see something like `Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)` in the output; you can
-query the API at that URL.
-
-### Ingesting STAC dataset
-
-Run `python ingest_data.py -h` for usage instructions. The script only works with an API that supports the
-Transaction extension.
+The database host and database user credentials are available via the AWS Secrets Manager console
+in the AWS account where the CloudFormation stack was deployed.
