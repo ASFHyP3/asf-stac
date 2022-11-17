@@ -4,17 +4,26 @@ on:
   push:
     branches:
       - develop
+      - main
 
 jobs:
   deploy-stac-api:
     runs-on: ubuntu-latest
+    if: github.ref == matrix.deploy_ref
     strategy:
       matrix:
         include:
           - environment: asf-stac-test
+            deploy_ref: refs/heads/develop
             template_bucket: cf-templates-aubvn3i9olmk-us-west-2
             github_branch: develop
             domain_name: stac-test.asf.alaska.edu
+
+          - environment: asf-stac
+            deploy_ref: refs/heads/main
+            template_bucket: cf-templates-aubvn3i9olmk-us-west-2
+            github_branch: main
+            domain_name: stac.asf.alaska.edu
 
     environment:
       name: ${{ matrix.environment }}
