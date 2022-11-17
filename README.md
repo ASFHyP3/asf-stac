@@ -14,7 +14,10 @@ make install
 
 ## STAC API
 
-TODO: document database URLs and the `/api.html` endpoint for the Swagger UI
+The test API is available at <https://stac-test.asf.alaska.edu>
+and the Swagger UI is available at <https://stac-test.asf.alaska.edu/api.html>.
+
+TODO: document prod URL
 
 ### Running the API locally
 
