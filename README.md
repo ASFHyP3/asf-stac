@@ -22,7 +22,8 @@ You can run the STAC API frontend locally (connected to the AWS-hosted database)
 the create/update/delete endpoints (which are provided by the STAC API's Transaction extension), as these
 endpoints are disabled for the publicly accessible API.
 
-To run the STAC API locally:
+Confirm that you're working from a machine with access to the database.
+See [Connecting to the database](#connecting-to-the-database) for exact requirements. Then run:
 
 ```
 make run-api db_host=<host> db_admin_password=<password>
@@ -66,6 +67,11 @@ version of `pypgstac`. See <https://stac-utils.github.io/pgstac/pypgstac> for mo
 ### Connecting to the database
 
 We shouldn't need to manually connect to the database, but we can if we need to.
+
+The database only accepts connections from within the ASF network or from clients
+with the client security group attached. See the ingress rules for the database security group in the
+[database CloudFormation template](apps/database/cloudformation.yml).
+
 Confirm you have the `psql` command installed, then run:
 
 ```
