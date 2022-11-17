@@ -8,10 +8,12 @@ on:
 jobs:
   deploy-stac-api:
     runs-on: ubuntu-latest
+    if: github.ref == matrix.deploy_ref
     strategy:
       matrix:
         include:
           - environment: asf-stac-test
+            deploy_ref: refs/heads/develop
             template_bucket: cf-templates-aubvn3i9olmk-us-west-2
             github_branch: develop
             domain_name: stac-test.asf.alaska.edu
