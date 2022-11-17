@@ -13,6 +13,7 @@ jobs:
       name: asf-stac
 
     steps:
+      - uses: actions/checkout@v3
       - uses: ./.github/actions/deploy-stac
         with:
           STACK_NAME: asf-stac
