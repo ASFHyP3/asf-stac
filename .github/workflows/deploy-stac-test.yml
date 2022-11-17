@@ -1,0 +1,20 @@
+name: Deploy STAC API test
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  deploy-stac-api:
+    runs-on: ubuntu-latest
+
+    environment:
+      name: asf-stac-test
+
+    steps:
+      - uses: ./.github/actions/deploy-stac
+        with:
+          STACK_NAME: asf-stac-test
+          GITHUB_BRANCH: develop
+          DOMAIN_NAME: stac-test.asf.alaska.edu
