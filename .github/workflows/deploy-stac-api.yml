@@ -40,8 +40,6 @@ jobs:
             cloudformation_role_arn=${{ secrets.CLOUDFORMATION_ROLE_ARN }} \
             db_admin_password=${{ secrets.DB_ADMIN_PASSWORD }} \
             db_read_password=${{ secrets.DB_READ_PASSWORD }} \
-            vpc_id=${{ secrets.VPC_ID }} \
-            subnet_ids=${{ secrets.SUBNET_IDS }} \
             cidr_ip=${{ secrets.CIDR_IP }} \
             github_branch=${{ matrix.github_branch }}
       - name: Get CodeBuild project

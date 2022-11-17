@@ -23,8 +23,6 @@ deploy:
 	    --parameter-overrides \
 	      DatabaseAdminPassword=${db_admin_password} \
 	      DatabaseReadPassword=${db_read_password} \
-	      VpcId=${vpc_id} \
-	      SubnetIds=${subnet_ids} \
 	      CidrIp=${cidr_ip} \
 	      GithubBranch=${github_branch}
 
