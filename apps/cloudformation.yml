@@ -1,11 +1,9 @@
 AWSTemplateFormatVersion: 2010-09-09
 
 Parameters:
-  VpcId:
-    Type: AWS::EC2::VPC::Id
 
-  SubnetIds:
-    Type: List<AWS::EC2::Subnet::Id>
+  GithubBranch:
+    Type: String
 
   CidrIp:
     Type: String
@@ -25,10 +23,19 @@ Parameters:
     Type: String
 
 Outputs:
-  DatabaseHost:
-    Value: !GetAtt Database.Outputs.DatabaseHost
+
+  BuildProject:
+    Value: !GetAtt Database.Outputs.BuildProject
 
 Resources:
+
+  VPC:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        EnvironmentName: !Ref AWS::StackName
+      TemplateURL: vpc/cloudformation.yml
+
   Api:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -36,7 +43,7 @@ Resources:
         DatabaseHost: !GetAtt Database.Outputs.DatabaseHost
         DatabaseReadPassword: !Ref DatabaseReadPassword
         SecurityGroupId: !GetAtt Database.Outputs.ClientSecurityGroupId
-        SubnetIds: !Join [",", !Ref SubnetIds]
+        SubnetIds: !GetAtt VPC.Outputs.PublicSubnets
         DomainName: !Ref DomainName
         CertificateArn: !Ref CertificateArn
       TemplateURL: api/cloudformation.yml
@@ -46,12 +53,10 @@ Resources:
     Properties:
       Parameters:
         DatabaseAdminPassword: !Ref DatabaseAdminPassword
-        VpcId: !Ref VpcId
+        DatabaseReadPassword: !Ref DatabaseReadPassword
+        VpcId: !GetAtt VPC.Outputs.VPC
+        PublicSubnetIds: !GetAtt VPC.Outputs.PublicSubnets
+        PrivateSubnetIds: !GetAtt VPC.Outputs.PrivateSubnets
         CidrIp: !Ref CidrIp
+        GithubBranch: !Ref GithubBranch
       TemplateURL: database/cloudformation.yml
-
-  DatabaseSecret:
-    Type: AWS::SecretsManager::Secret
-    Properties:
-      Description: !Sub "${AWS::StackName} database credentials"
-      SecretString: !Sub '{"database_host": "${Database.Outputs.DatabaseHost}", "admin_user": "postgres", "admin_password": "${DatabaseAdminPassword}", "read_user": "pgstac_read", "read_password": "${DatabaseReadPassword}"}'

@@ -1,30 +1,50 @@
 AWSTemplateFormatVersion: 2010-09-09
 
 Parameters:
+
   DatabaseAdminPassword:
+    Type: String
+    NoEcho: true
+
+  DatabaseReadPassword:
     Type: String
     NoEcho: true
 
   VpcId:
     Type: AWS::EC2::VPC::Id
 
+  PublicSubnetIds:
+    Type: CommaDelimitedList
+
+  PrivateSubnetIds:
+    Type: CommaDelimitedList
+
   CidrIp:
     Type: String
 
+  GithubBranch:
+    Type: String
+
 Outputs:
-  DatabaseHost:
-    Value: !GetAtt DatabaseInstance.Endpoint.Address
+
+  BuildProject:
+    Value: !Ref CodeBuildProject
 
   ClientSecurityGroupId:
     Value: !Ref ClientSecurityGroup
 
+  DatabaseHost:
+    Value: !GetAtt DatabaseInstance.Endpoint.Address
+
 Resources:
+
   DatabaseInstance:
     Type: AWS::RDS::DBInstance
     Properties:
       AllocatedStorage: '20' # TODO depends on StorageType?
-      DBInstanceClass: 'db.t3.micro' # TODO different class for prod?
-      DBSecurityGroups:
+      DBInstanceClass: db.t3.micro # TODO different class for prod?
+      DBSubnetGroupName: !Ref DatabaseSubnetGroup
+      VPCSecurityGroups:
         - !Ref DatabaseSecurityGroup
       Engine: postgres
       EngineVersion: '14.4'
@@ -36,16 +56,115 @@ Resources:
       PubliclyAccessible: true
       # TODO: StorageType: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-rds-dbinstance.html#cfn-rds-dbinstance-storagetype
 
+  DatabaseSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: !Sub "Subnet Group for ${AWS::StackName} database"
+      SubnetIds: !Ref PublicSubnetIds
+
   DatabaseSecurityGroup:
-    Type: AWS::RDS::DBSecurityGroup
+    Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: !Sub "Security group for ${AWS::StackName} database"
-      DBSecurityGroupIngress:
-        - EC2SecurityGroupId: !Ref ClientSecurityGroup
-        - CIDRIP: !Ref CidrIp
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          CidrIp: !Ref CidrIp
+          FromPort: 5432
+          ToPort: 5432
+        - IpProtocol: tcp
+          SourceSecurityGroupId: !Ref ClientSecurityGroup
+          FromPort: 5432
+          ToPort: 5432
 
   ClientSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: !Sub "Security group for clients of ${AWS::StackName} database"
       VpcId: !Ref VpcId
+
+  DatabaseSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Description: !Sub "${AWS::StackName} database credentials"
+      SecretString: !Sub '{"database_host": "${DatabaseInstance.Endpoint.Address}", "admin_user": "postgres", "admin_password": "${DatabaseAdminPassword}", "read_user": "pgstac_read", "read_password": "${DatabaseReadPassword}"}'
+
+  CodeBuildProject:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Type: LINUX_CONTAINER
+        Image: aws/codebuild/standard:5.0
+        EnvironmentVariables:
+          - Name: PGHOST
+            Type: SECRETS_MANAGER
+            Value: !Sub "${DatabaseSecret}:database_host"
+          - Name: PGPASSWORD
+            Type: SECRETS_MANAGER
+            Value: !Sub "${DatabaseSecret}:admin_password"
+          - Name: READ_PASSWORD
+            Type: SECRETS_MANAGER
+            Value: !Sub "${DatabaseSecret}:read_password"
+      ServiceRole: !Ref CodeBuildServiceRole
+      Source:
+        Type: GITHUB
+        Location: https://github.com/ASFHyP3/asf-stac.git
+        GitCloneDepth: 1
+        BuildSpec: apps/database/buildspec.yml
+      SourceVersion: !Ref GithubBranch
+      Artifacts:
+        Type: NO_ARTIFACTS
+      VpcConfig:
+        VpcId: !Ref VpcId
+        Subnets: !Ref PrivateSubnetIds
+        SecurityGroupIds:
+          - !Ref ClientSecurityGroup
+
+  CodeBuildLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/codebuild/${CodeBuildProject}"
+      RetentionInDays: 90
+
+  CodeBuildServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          Action: sts:AssumeRole
+          Principal:
+            Service: codebuild.amazonaws.com
+          Effect: Allow
+      Policies:
+        - PolicyName: policy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/*"
+              - Effect: Allow
+                Action:
+                  - ec2:CreateNetworkInterface
+                  - ec2:DescribeDhcpOptions
+                  - ec2:DescribeNetworkInterfaces
+                  - ec2:DeleteNetworkInterface
+                  - ec2:DescribeSubnets
+                  - ec2:DescribeSecurityGroups
+                  - ec2:DescribeVpcs
+                Resource: "*"
+              - Effect: Allow
+                Action: secretsmanager:GetSecretValue
+                Resource: !Ref DatabaseSecret
+              - Effect: Allow
+                Action: ec2:CreateNetworkInterfacePermission
+                Resource: !Sub "arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:network-interface/*"
+                Condition:
+                  StringEquals:
+                    ec2:AuthorizedService: codebuild.amazonaws.com
+                  StringLike:
+                    ec2:Subnet: !Sub "arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:subnet/*"
