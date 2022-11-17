@@ -32,7 +32,7 @@ jobs:
       - name: Install Lambda dependencies
         run: make -s install-lambda-deps
       - name: Install Python dependencies for deployment scripts
-        run: python -m pip install -r requirements-run-codebuild.yml
+        run: python -m pip install -r requirements-run-codebuild.txt
       - name: Deploy CloudFormation stack
         run: |
           make -s deploy \
