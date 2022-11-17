@@ -15,35 +15,35 @@ runs:
   using: composite
   steps:
       - uses: actions/checkout@v3
-        - uses: aws-actions/configure-aws-credentials@v1
-          with:
-            aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-            aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-            aws-region: us-west-2
-        - uses: actions/setup-python@v4
-          with:
-            python-version: 3.9
-        - name: Install Lambda dependencies
-          run: make -s install-lambda-deps
-        - name: Install Python dependencies for deployment scripts
-          run: python -m pip install -r requirements-run-codebuild.txt
-        - name: Deploy CloudFormation stack
-          run: |
-            make -s deploy \
-              stack_name=${{ inputs.STACK_NAME }} \
-              s3_bucket=${{ inputs.CF_TEMPLATE_BUCKET }} \
-              cloudformation_role_arn=${{ secrets.CLOUDFORMATION_ROLE_ARN }} \
-              db_admin_password=${{ secrets.DB_ADMIN_PASSWORD }} \
-              db_read_password=${{ secrets.DB_READ_PASSWORD }} \
-              cidr_ip=${{ secrets.CIDR_IP }} \
-              github_branch=${{ inputs.GITHUB_BRANCH }} \
-              domain_name=${{ inputs.DOMAIN_NAME }} \
-              certificate_arn=${{ secrets.CERTIFICATE_ARN }}
-        - name: Get CodeBuild project
-          run: |
-            echo "CODEBUILD_PROJECT=$(aws cloudformation describe-stacks \
-                                      --stack-name ${{ inputs.STACK_NAME }} \
-                                      --query 'Stacks[0].Outputs[?OutputKey==`BuildProject`].OutputValue' \
-                                      --output text)" >> $GITHUB_ENV
-        - name: Run CodeBuild
-          run: python run_codebuild.py
+      - uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-west-2
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+      - name: Install Lambda dependencies
+        run: make -s install-lambda-deps
+      - name: Install Python dependencies for deployment scripts
+        run: python -m pip install -r requirements-run-codebuild.txt
+      - name: Deploy CloudFormation stack
+        run: |
+          make -s deploy \
+            stack_name=${{ inputs.STACK_NAME }} \
+            s3_bucket=${{ inputs.CF_TEMPLATE_BUCKET }} \
+            cloudformation_role_arn=${{ secrets.CLOUDFORMATION_ROLE_ARN }} \
+            db_admin_password=${{ secrets.DB_ADMIN_PASSWORD }} \
+            db_read_password=${{ secrets.DB_READ_PASSWORD }} \
+            cidr_ip=${{ secrets.CIDR_IP }} \
+            github_branch=${{ inputs.GITHUB_BRANCH }} \
+            domain_name=${{ inputs.DOMAIN_NAME }} \
+            certificate_arn=${{ secrets.CERTIFICATE_ARN }}
+      - name: Get CodeBuild project
+        run: |
+          echo "CODEBUILD_PROJECT=$(aws cloudformation describe-stacks \
+                                    --stack-name ${{ inputs.STACK_NAME }} \
+                                    --query 'Stacks[0].Outputs[?OutputKey==`BuildProject`].OutputValue' \
+                                    --output text)" >> $GITHUB_ENV
+      - name: Run CodeBuild
+        run: python run_codebuild.py
