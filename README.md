@@ -2,16 +2,6 @@
 
 A repository containing code related to the creation and hosting of STAC catalogs by the ASF Tools team.
 
-## Developer setup
-
-Create the environment and install developer dependencies:
-
-```
-conda create -n asf-stac python=3.9
-conda activate asf-stac
-make install
-```
-
 ## STAC API
 
 The test API is available at <https://stac-test.asf.alaska.edu>
@@ -19,14 +9,45 @@ and the Swagger UI is available at <https://stac-test.asf.alaska.edu/api.html>.
 
 TODO: document prod URL
 
+## Developer setup
+
+Clone the repository, create the environment, and install the developer dependencies:
+
+```
+git clone git@github.com:ASFHyP3/asf-stac.git
+cd asf-stac
+
+conda create -n asf-stac python=3.9
+conda activate asf-stac
+make install
+```
+
 ### Running the API locally
 
 You can run the STAC API frontend locally (connected to the AWS-hosted database). This is required for accessing
 the create/update/delete endpoints (which are provided by the STAC API's Transaction extension), as these
 endpoints are disabled for the publicly accessible API.
 
-Confirm that you're working from a machine with access to the database.
-See [Connecting to the database](#connecting-to-the-database) for exact requirements. Then run:
+
+#### Connecting to the database
+
+The database only accepts connections from within the ASF network or from clients
+with the client security group attached. See the ingress rules for the database security group in the
+[database CloudFormation template](apps/database/cloudformation.yml).
+
+Confirm you have [PostgreSQL installed](https://www.postgresql.org/download/) and the `psql` command is executable,
+then run:
+
+```
+make psql db_host=<host> db_user=<user> db_password=<password>
+```
+
+**Note:** The database host and database user credentials are available via the AWS Secrets Manager console
+in the AWS account where the CloudFormation stack was deployed.
+
+#### Running the API
+
+Once you've confirmed that you can access to the database, you can run the API with:
 
 ```
 make run-api db_host=<host> db_admin_password=<password>
@@ -34,6 +55,10 @@ make run-api db_host=<host> db_admin_password=<password>
 
 You should see something like `Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)` in the output; you can
 query the API at that URL.
+
+#### Enabling/Disabling the Transactions endpoint
+
+TODO
 
 ### Ingesting a STAC dataset
 
@@ -66,20 +91,3 @@ The initial AWS deployment creates a Postgres database, installs the PostGIS ext
 
 PgSTAC upgrades are handled automatically: the deployment pipeline migrates the database to the installed
 version of `pypgstac`. See <https://stac-utils.github.io/pgstac/pypgstac> for more information about migrations.
-
-### Connecting to the database
-
-We shouldn't need to manually connect to the database, but we can if we need to.
-
-The database only accepts connections from within the ASF network or from clients
-with the client security group attached. See the ingress rules for the database security group in the
-[database CloudFormation template](apps/database/cloudformation.yml).
-
-Confirm you have the `psql` command installed, then run:
-
-```
-make psql db_host=<host> db_user=<user> db_password=<password>
-```
-
-The database host and database user credentials are available via the AWS Secrets Manager console
-in the AWS account where the CloudFormation stack was deployed.
