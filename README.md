@@ -67,7 +67,7 @@ from the public API, update this paragraph to reflect that they will no longer a
 ## Ingesting a STAC dataset
 
 Run `python ingest_data.py -h` for usage instructions. You must run the ingest script against
-a locally running API (as the script requires access to the Transaction endpoints).
+a locally running API, as the script requires access to the Transaction endpoints.
 
 ## Upgrading the database
 
