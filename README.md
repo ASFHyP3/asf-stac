@@ -15,7 +15,7 @@ Clone the repository, create the environment, and install the developer dependen
 git clone git@github.com:ASFHyP3/asf-stac.git
 cd asf-stac
 
-conda create -n asf-stac python=3.9
+conda create -c conda-forge -n asf-stac python=3.9 postgresql
 conda activate asf-stac
 
 make install
