@@ -37,7 +37,7 @@ in the AWS account where the CloudFormation stack was deployed.
 We shouldn't need to manually connect to the database during normal operations, but we can if we need to
 (e.g. for debugging purposes).
 
-Confirm you have the `psql` command installed, then run:
+Confirm that you have [PostgreSQL](https://www.postgresql.org/download/) installed, then run:
 
 ```
 make psql db_host=<host> db_user=<user> db_password=<password>
