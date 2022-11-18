@@ -205,7 +205,7 @@ def create_tile_stac_collection(
 def safe_create_tile_stac_collection(s3_client, bucket, prefix):
     try:
         collection = create_tile_stac_collection(s3_client, bucket, prefix)
-    except:
+    except IndexError:
         collection = prefix
     return collection
 
@@ -261,7 +261,7 @@ def get_all_tiles(s3_client, bucket, prefix, requester_pays=False):
     prefixes = [item for sublist in prefix_lists for item in sublist]
     prefixes = list(set(prefixes))
     with open('prefixes.txt', 'w') as f:
-        f.writelines([x+'\n' for x in prefixes])
+        f.writelines([x + '\n' for x in prefixes])
     return prefixes
 
 
@@ -283,9 +283,12 @@ if __name__ == '__main__':
     print('creating items...')
     with ThreadPoolExecutor(max_workers=20) as executor:
         results = list(
-            tqdm(executor.map(safe_create_tile_stac_collection, repeat(s3), repeat(bucket), prefixes), total=len(prefixes))
+            tqdm(
+                executor.map(safe_create_tile_stac_collection, repeat(s3), repeat(bucket), prefixes),
+                total=len(prefixes),
+            )
         )
-    
+
     print('creating catalog...')
     invalid_tiles = []
     catalog = create_stac_catalog()
@@ -299,4 +302,4 @@ if __name__ == '__main__':
     catalog_name = save_stac_catalog_locally(catalog, 'coherence_stac')
     if invalid_tiles:
         with open('data/invalid_tiles.txt', 'w') as f:
-            f.writelines([x+'\n' for x in invalid_tiles])
+            f.writelines([x + '\n' for x in invalid_tiles])
