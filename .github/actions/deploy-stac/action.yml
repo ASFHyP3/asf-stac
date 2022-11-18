@@ -37,10 +37,13 @@ runs:
       with:
         python-version: 3.9
     - name: Install Lambda dependencies
+      shell: bash
       run: make -s install-lambda-deps
     - name: Install CodeBuild dependencies
+      shell: bash
       run: python -m pip install -r requirements-run-codebuild.txt
     - name: Deploy CloudFormation stack
+      shell: bash
       run: |
         make -s deploy \
           stack_name=${{ inputs.STACK_NAME }} \
@@ -53,10 +56,12 @@ runs:
           domain_name=${{ inputs.DOMAIN_NAME }} \
           certificate_arn=${{ inputs.CERTIFICATE_ARN }}
     - name: Get CodeBuild project
+      shell: bash
       run: |
         echo "CODEBUILD_PROJECT=$(aws cloudformation describe-stacks \
                                   --stack-name ${{ inputs.STACK_NAME }} \
                                   --query 'Stacks[0].Outputs[?OutputKey==`BuildProject`].OutputValue' \
                                   --output text)" >> $GITHUB_ENV
     - name: Run CodeBuild
+      shell: bash
       run: python run_codebuild.py
