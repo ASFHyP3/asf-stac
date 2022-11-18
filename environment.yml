@@ -3,20 +3,8 @@ channels:
   - conda-forge
   - nodefaults
 dependencies:
-  - boto3
-  - botocore
-  - cfn-lint
-  - python
+  - python=3.9
   - pip
-  - pystac
-  - requests
-  - shapely
-  - tqdm
-  # For packaging, and testing
-  - flake8
-  - flake8-import-order
-  - flake8-blind-except
-  - flake8-builtins
-  - pytest
-  - pytest-console-scripts
-  - pytest-cov
+  - postgresql
+  - pip:
+      - -r requirements.txt
