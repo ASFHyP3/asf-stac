@@ -34,8 +34,8 @@ in the AWS account where the CloudFormation stack was deployed.
 
 ## Manually connecting to the database
 
-We shouldn't need to manually connect to the database during normal operations, as the API will connect automatically, but we can if we need to
-(e.g. for debugging purposes).
+We shouldn't need to manually connect to the database during normal operations,
+as the API will connect automatically, but we can if we need to (e.g. for debugging purposes).
 
 Confirm that you have [PostgreSQL](https://www.postgresql.org/download/) installed, then run:
 
