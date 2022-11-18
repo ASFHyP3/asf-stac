@@ -64,6 +64,11 @@ under the "Transaction Extension" heading. You should be able to successfully qu
 the local API, but not via the publicly available API. (TODO: after removing those endpoints completely
 from the public API, update this paragraph to reflect that they will no longer appear in the Swagger UI.)
 
+## Ingesting a STAC dataset
+
+Run `python ingest_data.py -h` for usage instructions. You must run the ingest script against
+a locally running API, as the script requires access to the Transaction endpoints.
+
 ## Working with the database from an EC2 instance
 
 As explained in [Requirements for connecting to the database](#requirements-for-connecting-to-the-database),
@@ -89,11 +94,6 @@ follow the steps below:
 
 4. If you're ingesting a dataset that is stored in S3, you can use the AWS CLI to download the S3 object
    to the EC2 instance before running the ingest script.
-
-## Ingesting a STAC dataset
-
-Run `python ingest_data.py -h` for usage instructions. You must run the ingest script against
-a locally running API, as the script requires access to the Transaction endpoints.
 
 ## Upgrading the database
 
