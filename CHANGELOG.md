@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.1.1]
 ### Added
-- Added functionality to create stac catalog for entire coherence dataset
+- Updated `coherence_stac.py` to create a STAC catalog for the entire coherence dataset
 
 ## [0.1.0]
 ### Added
