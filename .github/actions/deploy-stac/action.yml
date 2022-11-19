@@ -1,0 +1,67 @@
+name: Deploy STAC API
+description: Deploy the STAC API
+
+inputs:
+  AWS_ACCESS_KEY_ID:
+    required: true
+  AWS_SECRET_ACCESS_KEY:
+    required: true
+  CLOUDFORMATION_ROLE_ARN:
+    required: true
+  DB_ADMIN_PASSWORD:
+    required: true
+  DB_READ_PASSWORD:
+    required: true
+  CIDR_IP:
+    required: true
+  CERTIFICATE_ARN:
+    required: true
+  STACK_NAME:
+    required: true
+  GITHUB_BRANCH:
+    required: true
+  DOMAIN_NAME:
+    required: true
+  CF_TEMPLATE_BUCKET:
+    default: cf-templates-aubvn3i9olmk-us-west-2  # For HyP3 account
+
+runs:
+  using: composite
+  steps:
+    - uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ inputs.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ inputs.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-west-2
+    - uses: actions/setup-python@v4
+      with:
+        python-version: 3.9
+    - name: Install Lambda dependencies
+      shell: bash
+      run: make -s install-lambda-deps
+    - name: Install CodeBuild dependencies
+      shell: bash
+      run: python -m pip install -r requirements-run-codebuild.txt
+    - name: Deploy CloudFormation stack
+      shell: bash
+      run: |
+        make -s deploy \
+          stack_name=${{ inputs.STACK_NAME }} \
+          s3_bucket=${{ inputs.CF_TEMPLATE_BUCKET }} \
+          cloudformation_role_arn=${{ inputs.CLOUDFORMATION_ROLE_ARN }} \
+          db_admin_password=${{ inputs.DB_ADMIN_PASSWORD }} \
+          db_read_password=${{ inputs.DB_READ_PASSWORD }} \
+          cidr_ip=${{ inputs.CIDR_IP }} \
+          github_branch=${{ inputs.GITHUB_BRANCH }} \
+          domain_name=${{ inputs.DOMAIN_NAME }} \
+          certificate_arn=${{ inputs.CERTIFICATE_ARN }}
+    - name: Get CodeBuild project
+      shell: bash
+      run: |
+        echo "CODEBUILD_PROJECT=$(aws cloudformation describe-stacks \
+                                  --stack-name ${{ inputs.STACK_NAME }} \
+                                  --query 'Stacks[0].Outputs[?OutputKey==`BuildProject`].OutputValue' \
+                                  --output text)" >> $GITHUB_ENV
+    - name: Run CodeBuild
+      shell: bash
+      run: python run_codebuild.py

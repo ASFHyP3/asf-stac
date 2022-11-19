@@ -1,0 +1,62 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Parameters:
+
+  GithubBranch:
+    Type: String
+
+  CidrIp:
+    Type: String
+
+  DatabaseAdminPassword:
+    Type: String
+    NoEcho: true
+
+  DatabaseReadPassword:
+    Type: String
+    NoEcho: true
+
+  DomainName:
+    Type: String
+
+  CertificateArn:
+    Type: String
+
+Outputs:
+
+  BuildProject:
+    Value: !GetAtt Database.Outputs.BuildProject
+
+Resources:
+
+  VPC:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        EnvironmentName: !Ref AWS::StackName
+      TemplateURL: vpc/cloudformation.yml
+
+  Api:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        DatabaseHost: !GetAtt Database.Outputs.DatabaseHost
+        DatabaseReadPassword: !Ref DatabaseReadPassword
+        SecurityGroupId: !GetAtt Database.Outputs.ClientSecurityGroupId
+        SubnetIds: !GetAtt VPC.Outputs.PublicSubnets
+        DomainName: !Ref DomainName
+        CertificateArn: !Ref CertificateArn
+      TemplateURL: api/cloudformation.yml
+
+  Database:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        DatabaseAdminPassword: !Ref DatabaseAdminPassword
+        DatabaseReadPassword: !Ref DatabaseReadPassword
+        VpcId: !GetAtt VPC.Outputs.VPC
+        PublicSubnetIds: !GetAtt VPC.Outputs.PublicSubnets
+        PrivateSubnetIds: !GetAtt VPC.Outputs.PrivateSubnets
+        CidrIp: !Ref CidrIp
+        GithubBranch: !Ref GithubBranch
+      TemplateURL: database/cloudformation.yml

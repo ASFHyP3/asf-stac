@@ -1,0 +1,14 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.9
+    commands:
+      - apt update
+      - apt install -y postgresql-12
+      - make install-pypgstac
+      - pyenv rehash
+  build:
+    commands:
+      - make configure-database db_host=$PGHOST db_admin_password=$PGPASSWORD db_read_password=$READ_PASSWORD
