@@ -18,8 +18,6 @@ cd asf-stac
 
 conda env create -f environment.yml
 conda activate asf-stac
-
-make install
 ```
 
 ## Requirements for connecting to the database
