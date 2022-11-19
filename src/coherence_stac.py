@@ -1,3 +1,4 @@
+import argparse
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from itertools import repeat
@@ -9,7 +10,7 @@ from pystac.extensions import sar
 from shapely import geometry
 from tqdm import tqdm
 
-'''
+"""
 Design:
 
 [x] connect to aws open bucket containing coherence data
@@ -28,7 +29,9 @@ structure:
         rho
         rmse
         tau
-'''
+"""
+
+COHERENCE_DATA_BUCKET = 'sentinel-1-global-coherence-earthbigdata'
 
 SENTINEL1_CENTER_FREQUENCY = 5.405
 SEASONS = {
@@ -66,18 +69,20 @@ DESCRIPTION = (
     'and is rich in spatial and temporal information for a variety of mapping applications.'
 )
 
+s3 = boto3.client('s3')
 
-def construct_url(s3_client, bucket, key):
-    location = s3_client.get_bucket_location(Bucket=bucket)['LocationConstraint']
+
+def construct_url(bucket, key):
+    location = s3.get_bucket_location(Bucket=bucket)['LocationConstraint']
     url = f'https://{bucket}.s3.{location}.amazonaws.com/{key}'
     return url
 
 
-def get_object_urls(s3_client, bucket, prefix, requester_pays=False):
+def get_object_urls(bucket, prefix, requester_pays=False):
     kwargs = {'RequestPayer': 'requester'} if requester_pays else {}
-    response = s3_client.list_objects_v2(Bucket=bucket, Prefix=prefix, **kwargs)
+    response = s3.list_objects_v2(Bucket=bucket, Prefix=prefix, **kwargs)
     keys = [x['Key'] for x in response['Contents']]
-    urls = [construct_url(s3_client, bucket, x) for x in keys]
+    urls = [construct_url(bucket, x) for x in keys]
     return urls
 
 
@@ -175,9 +180,9 @@ def create_stac_item(yearly_assets, seasonal_assets):
 
 
 def create_tile_stac_collection(
-    s3_client, bucket, prefix, date_interval=(datetime(2019, 12, 1), datetime(2020, 11, 30))
+    bucket, prefix, date_interval=(datetime(2019, 12, 1), datetime(2020, 11, 30))
 ):
-    urls = get_object_urls(s3_client, bucket, prefix, requester_pays=True)
+    urls = get_object_urls(bucket, prefix, requester_pays=True)
     asset_dicts = [parse_url(x) for x in urls]
     items = []
 
@@ -202,9 +207,9 @@ def create_tile_stac_collection(
     return collection
 
 
-def safe_create_tile_stac_collection(s3_client, bucket, prefix):
+def safe_create_tile_stac_collection(bucket, prefix):
     try:
-        collection = create_tile_stac_collection(s3_client, bucket, prefix)
+        collection = create_tile_stac_collection(bucket, prefix)
     except IndexError:
         collection = prefix
     return collection
@@ -221,70 +226,68 @@ def create_stac_catalog():
     return catalog
 
 
-def save_stac_catalog_locally(catalog, catalog_name: str):
-    catalog_name = Path(catalog_name)
-    if not catalog_name.exists():
-        catalog_name.mkdir()
-    catalog.normalize_hrefs(str(catalog_name))
+def save_stac_catalog_locally(catalog, catalog_location: Path):
+    if not catalog_location.exists():
+        catalog_location.mkdir()
+
+    catalog.normalize_hrefs(str(catalog_location))
     catalog.save()
-    return catalog_name / 'catalog.json'
+
+    return catalog_location / 'catalog.json'
 
 
-def save_stac_catalog_s3(catalog, s3_client, bucket, key):
-    base_url = Path(construct_url(s3_client, bucket, key))
-    catalog_name = base_url.name
+def save_stac_catalog_s3(catalog, bucket, key):
+    base_url = construct_url(bucket, key)
     catalog.normalize_hrefs(str(base_url))
-    catalog.save(dest_href=catalog_name)
-    return catalog_name
+    catalog.save(dest_href=base_url)
+    return base_url
 
 
-def parse_france_list(data_path):
-    with open(data_path, 'r') as f:
-        urls = [x.strip() for x in f.readlines()]
-    tileids = [parse_url(x)['tileid'] for x in urls]
-    return list(set(tileids))
+def get_all_tiles(bucket: str, prefix: str, requester_pays: bool = False) -> set:
+    kwargs = {
+        'Bucket': bucket,
+        'Prefix': prefix,
+    }
+    if requester_pays:
+        kwargs['RequestPayer'] = 'requester'
 
-
-def get_all_tiles(s3_client, bucket, prefix, requester_pays=False):
-    kwargs = {'RequestPayer': 'requester'} if requester_pays else {}
-    kwargs['Bucket'] = bucket
-    kwargs['Prefix'] = prefix
     paginator = s3.get_paginator('list_objects_v2')
     page_iterator = paginator.paginate(**kwargs)
-    prefix_lists = []
+    tile_set = set()
     for page in page_iterator:
         keys = [x['Key'] for x in page['Contents']]
-        page_prefixes = [x.split('/')[2] for x in keys if '.' not in x.split('/')[2]]
-        page_prefixes = list(set(page_prefixes))
-        prefix_lists.append(page_prefixes)
+        page_tiles = [x.split('/')[2] for x in keys if '.' not in x.split('/')[2]]
+        tile_set.update(page_tiles)
+        break
 
-    prefixes = [item for sublist in prefix_lists for item in sublist]
-    prefixes = list(set(prefixes))
-    with open('prefixes.txt', 'w') as f:
-        f.writelines([x + '\n' for x in prefixes])
-    return prefixes
+    return tile_set
 
 
-if __name__ == '__main__':
-    bucket = 'sentinel-1-global-coherence-earthbigdata'
-    upload_bucket = 'ffwilliams2-shenanigans'
-    upload_key = 'stac/coherence_stac'
+def main():
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-    # tiles = parse_france_list('data/france_urls.txt')
-    # prefixes = [f'data/tiles/{x}/' for x in tiles]
+    parser.add_argument('-c', '--catalog', type=Path, default=Path('coherence_catalog'),
+                        help='Location to save the catalog')
+    parser.add_argument('-b', '--bucket', help='bucket to upload completed catalog')
+    parser.add_argument('-p', '--prefix', help='bucket to upload completed catalog')
+    parser.add_argument('-t', '--tile-list', type=Path, help='Line-seperated list of tiles to create collections for')
 
-    s3 = boto3.client('s3')
-    # tiles = get_all_tiles(s3, bucket, 'data/tiles/')
-    with open('data/prefixes.txt', 'r') as f:
-        tiles = [x.strip() for x in f.readlines()]
+    parser.add_argument('-v', '--verbose', action='store_true', help='Turn on verbose logging')
+    args = parser.parse_args()
+
+    if args.tile_list:
+        with open(args.tile_list, 'r') as f:
+            tiles = {x.strip() for x in f.readlines()}
+    else:
+        tiles = get_all_tiles(COHERENCE_DATA_BUCKET, 'data/tiles/')
+
     prefixes = [f'data/tiles/{x}/' for x in tiles]
 
-    # Multi-thread
     print('creating items...')
     with ThreadPoolExecutor(max_workers=20) as executor:
-        results = list(
+        tile_collections = list(
             tqdm(
-                executor.map(safe_create_tile_stac_collection, repeat(s3), repeat(bucket), prefixes),
+                executor.map(safe_create_tile_stac_collection, repeat(COHERENCE_DATA_BUCKET), prefixes),
                 total=len(prefixes),
             )
         )
@@ -292,14 +295,20 @@ if __name__ == '__main__':
     print('creating catalog...')
     invalid_tiles = []
     catalog = create_stac_catalog()
-    for result in tqdm(results):
-        if isinstance(result, pystac.collection.Collection):
-            catalog.add_child(result)
+    for collection in tqdm(tile_collections):
+        if isinstance(collection, pystac.collection.Collection):
+            catalog.add_child(collection)
         else:
-            invalid_tiles.append(result)
+            print(f'WARNING: Invalid collection! {collection}')
+            invalid_tiles.append(collection)
 
     print('saving catalog...')
-    catalog_name = save_stac_catalog_locally(catalog, 'coherence_stac')
-    if invalid_tiles:
-        with open('data/invalid_tiles.txt', 'w') as f:
-            f.writelines([x + '\n' for x in invalid_tiles])
+    if args.bucket:
+        catalog_location = save_stac_catalog_s3(catalog, args.bucket, args.prefix)
+    else:
+        catalog_location = save_stac_catalog_locally(catalog, args.catalog)
+    print(f'Done! Created {catalog_location}')
+
+
+if __name__ == '__main__':
+    main()
