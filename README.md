@@ -69,32 +69,6 @@ from the public API, update this paragraph to reflect that they will no longer a
 Run `python ingest_data.py -h` for usage instructions. You must run the ingest script against
 a locally running API, as the script requires access to the Transaction endpoints.
 
-## Working with the database from an EC2 instance
-
-As explained in [Requirements for connecting to the database](#requirements-for-connecting-to-the-database),
-the database only accepts connections from particular sources. If you want to work with the database
-from an EC2 instance (e.g. because your local internet speed is insufficient for ingesting a large dataset),
-follow the steps below:
-
-1. Follow the
-   [Working from an EC2 instance](https://github.com/ASFHyP3/.github-private/wiki/Working-from-an-EC2-instance)
-   Tools Team Wiki article to create an EC2 instance in the same AWS account as the database:
-   * Instead of the default VPC, select the VPC that corresponds to the appropriate ASF STAC deployment
-     (this should be obvious from the name of the VPC in the drop-down list).
-   * After launching the instance, add an additional security group as described in the article;
-     in the list of available security groups, select the one whose name identifies it as the ASF STAC
-     database client security group.
-
-2. After SSHing into your instance and running tmux as described in the wiki article, follow
-   [Developer setup](#developer-setup) to clone and set up this repo on the EC2 instance.
-
-3. If you want to run the API on the EC2 instance (e.g. for ingesting a dataset), you can run the API as described in
-   [Running the API locally](#running-the-API-locally). After the API is running, you can create a new tmux
-   window to accomplish more work, such as running the ingest script.
-
-4. If you're ingesting a dataset that is stored in S3, you can use the AWS CLI to download the S3 object
-   to the EC2 instance before running the ingest script.
-
 ## Upgrading the database
 
 The initial AWS deployment creates a Postgres database, installs the PostGIS extension, and then installs
