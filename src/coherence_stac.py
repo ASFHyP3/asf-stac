@@ -3,6 +3,7 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from itertools import repeat
 from pathlib import Path
+from typing import List, Tuple, Union
 
 import boto3
 import pystac
@@ -72,13 +73,13 @@ DESCRIPTION = (
 s3 = boto3.client('s3')
 
 
-def construct_url(bucket, key):
+def construct_url(bucket: str, key: str):
     location = s3.get_bucket_location(Bucket=bucket)['LocationConstraint']
     url = f'https://{bucket}.s3.{location}.amazonaws.com/{key}'
     return url
 
 
-def get_object_urls(bucket, prefix, requester_pays=False):
+def get_object_urls(bucket: str, prefix: str, requester_pays: bool = False):
     kwargs = {'RequestPayer': 'requester'} if requester_pays else {}
     response = s3.list_objects_v2(Bucket=bucket, Prefix=prefix, **kwargs)
     keys = [x['Key'] for x in response['Contents']]
@@ -87,7 +88,7 @@ def get_object_urls(bucket, prefix, requester_pays=False):
 
 
 # TODO why is there an extra zero in N48W090, will this cause issues?
-def tileid_to_bbox(tileid):
+def tileid_to_bbox(tileid: str) -> geometry.Polygon:
     north = int(tileid[1:3])
     if tileid[0] == 'S':
         north *= -1
@@ -101,7 +102,7 @@ def tileid_to_bbox(tileid):
     return bbox
 
 
-def parse_url(url):
+def parse_url(url: str) -> dict:
     parts = Path(url.upper()).stem.split('_')
     if len(parts) == 3:
         tileid, orbit, product = parts
@@ -124,7 +125,7 @@ def parse_url(url):
     return metadata
 
 
-def create_stac_item(yearly_assets, seasonal_assets):
+def create_stac_item(yearly_assets: List[dict], seasonal_assets: List[dict]) -> pystac.Item:
     ex_asset = seasonal_assets[0]
     item_id = f'{ex_asset["tileid"]}_{ex_asset["season"]}'
     start_date = ex_asset['date_range'][0]
@@ -180,8 +181,9 @@ def create_stac_item(yearly_assets, seasonal_assets):
 
 
 def create_tile_stac_collection(
-    bucket, prefix, date_interval=(datetime(2019, 12, 1), datetime(2020, 11, 30))
-):
+        bucket: str, prefix: str,
+        date_interval: Tuple[datetime, datetime] = (datetime(2019, 12, 1), datetime(2020, 11, 30))
+) -> pystac.collection.Collection:
     urls = get_object_urls(bucket, prefix, requester_pays=True)
     asset_dicts = [parse_url(x) for x in urls]
     items = []
@@ -207,7 +209,7 @@ def create_tile_stac_collection(
     return collection
 
 
-def safe_create_tile_stac_collection(bucket, prefix):
+def safe_create_tile_stac_collection(bucket: str, prefix: str) -> Union[str, pystac.collection.Collection]:
     try:
         collection = create_tile_stac_collection(bucket, prefix)
     except IndexError:
@@ -215,7 +217,7 @@ def safe_create_tile_stac_collection(bucket, prefix):
     return collection
 
 
-def create_stac_catalog():
+def create_stac_catalog() -> pystac.catalog.Catalog:
     extra_fields = {'License': LICENSE, 'Data Citation': DATA_CITATION, 'Literature Citation': LITERATURE_CITATION}
     catalog = pystac.Catalog(
         id='sentinel-1-global-coherence-earthbigdata',
@@ -226,7 +228,7 @@ def create_stac_catalog():
     return catalog
 
 
-def save_stac_catalog_locally(catalog, catalog_location: Path):
+def save_stac_catalog_locally(catalog: pystac.catalog.Catalog, catalog_location: Path):
     if not catalog_location.exists():
         catalog_location.mkdir()
 
@@ -236,7 +238,7 @@ def save_stac_catalog_locally(catalog, catalog_location: Path):
     return catalog_location / 'catalog.json'
 
 
-def save_stac_catalog_s3(catalog, bucket, key):
+def save_stac_catalog_s3(catalog: pystac.catalog.Catalog, bucket: str, key: str) -> str:
     base_url = construct_url(bucket, key)
     catalog.normalize_hrefs(str(base_url))
     catalog.save(dest_href=base_url)
