@@ -2,10 +2,11 @@
 
 Creation and hosting of STAC catalogs by the ASF Tools team.
 
-The test API is available at <https://stac-test.asf.alaska.edu>
-and the Swagger UI is available at <https://stac-test.asf.alaska.edu/api.html>.
+**Production API:** <https://stac.asf.alaska.edu>
+* *Swagger UI:* <https://stac.asf.alaska.edu/api.html>
 
-TODO: document prod URL
+**Test API:** <https://stac-test.asf.alaska.edu>
+* *Swagger UI:* <https://stac-test.asf.alaska.edu/api.html>
 
 ## Developer setup
 
