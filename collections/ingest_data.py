@@ -14,6 +14,16 @@ from urllib.parse import urljoin
 import requests
 
 
+class ServerSession(requests.Session):
+    def __init__(self, prefix_url: str):
+        super(ServerSession, self).__init__()
+        self.prefix_url = prefix_url
+
+    def request(self, method, url, *args, **kwargs):
+        url = urljoin(self.prefix_url, url)
+        return super(ServerSession, self).request(method, url, *args, **kwargs)
+
+
 def get_endpoint(stac_object: dict) -> str:
     if stac_object['type'] in ('Catalog', 'Collection'):
         endpoint = '/collections'
@@ -23,11 +33,10 @@ def get_endpoint(stac_object: dict) -> str:
     return endpoint
 
 
-def add_stac_object(stac_object: dict, api_url: str, session: requests.Session) -> None:
+def add_stac_object(stac_object: dict, session: ServerSession) -> None:
     print(stac_object['id'])
     endpoint = get_endpoint(stac_object)
-    url = urljoin(api_url, endpoint)
-    response = session.post(url, json=stac_object)
+    response = session.post(endpoint, json=stac_object)
 
     if response.status_code == 409:
         print('Skipping existing object')
@@ -44,11 +53,11 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
-    session = requests.Session()
+    session = ServerSession(args.api_url)
     for json_file in args.json_files:
         with open(json_file) as f:
             stac_object = json.load(f)
-        add_stac_object(stac_object, args.api_url, session)
+        add_stac_object(stac_object, session)
 
 
 if __name__ == '__main__':
