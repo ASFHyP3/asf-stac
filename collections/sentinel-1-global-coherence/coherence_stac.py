@@ -1,7 +1,6 @@
 import argparse
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
-from itertools import repeat
 from pathlib import Path
 from typing import List, Tuple, Union
 
@@ -181,10 +180,10 @@ def create_stac_item(yearly_assets: List[dict], seasonal_assets: List[dict]) -> 
 
 
 def create_tile_stac_collection(
-        bucket: str, prefix: str,
+        prefix: str,
         date_interval: Tuple[datetime, datetime] = (datetime(2019, 12, 1), datetime(2020, 11, 30))
 ) -> pystac.collection.Collection:
-    urls = get_object_urls(bucket, prefix, requester_pays=True)
+    urls = get_object_urls(COHERENCE_DATA_BUCKET, prefix, requester_pays=True)
     asset_dicts = [parse_url(x) for x in urls]
     items = []
 
@@ -209,9 +208,9 @@ def create_tile_stac_collection(
     return collection
 
 
-def safe_create_tile_stac_collection(bucket: str, prefix: str) -> Union[str, pystac.collection.Collection]:
+def safe_create_tile_stac_collection(prefix: str) -> Union[str, pystac.collection.Collection]:
     try:
-        collection = create_tile_stac_collection(bucket, prefix)
+        collection = create_tile_stac_collection(prefix)
     except IndexError:
         collection = prefix
     return collection
@@ -245,9 +244,9 @@ def save_stac_catalog_s3(catalog: pystac.catalog.Catalog, bucket: str, key: str)
     return base_url
 
 
-def get_all_tiles(bucket: str, prefix: str, requester_pays: bool = False) -> set:
+def get_all_tiles(prefix: str, requester_pays: bool = False) -> set:
     kwargs = {
-        'Bucket': bucket,
+        'Bucket': COHERENCE_DATA_BUCKET,
         'Prefix': prefix,
     }
     if requester_pays:
@@ -281,7 +280,7 @@ def main():
         with open(args.tile_list, 'r') as f:
             tiles = {x.strip() for x in f.readlines()}
     else:
-        tiles = get_all_tiles(COHERENCE_DATA_BUCKET, 'data/tiles/')
+        tiles = get_all_tiles('data/tiles/')
 
     prefixes = [f'data/tiles/{x}/' for x in tiles]
 
@@ -289,7 +288,7 @@ def main():
     with ThreadPoolExecutor(max_workers=20) as executor:
         tile_collections = list(
             tqdm(
-                executor.map(safe_create_tile_stac_collection, repeat(COHERENCE_DATA_BUCKET), prefixes),
+                executor.map(safe_create_tile_stac_collection, prefixes),
                 total=len(prefixes),
             )
         )
