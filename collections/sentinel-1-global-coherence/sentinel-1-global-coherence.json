@@ -34,7 +34,7 @@
     "sar:product_type": ["COH06", "COH12", "COH18", "COH24", "COH36", "COH48", "AMP", "rho", "rmse", "tau", "inc", "lsmap"]
   },
   "stac_extensions": [],
-  "License": "Creative Commons Attribution 4.0 International Public License",
+  "license": "Creative Commons Attribution 4.0 International Public License",
   "Data Citation": "Kellndorfer, J. , O. Cartus, M. Lavalle,  C. Magnard, P. Milillo, S. Oveisgharan, B. Osmanoglu, P. Rosen, and U. Wegmuller. 2022. Global seasonal Sentinel-1 interferometric coherence and backscatter data set. [Indicate subset used]. Fairbanks, Alaska USA. NASA Alaska Satellite Facility Synthetic Aperture Radar Distributed Active Archive Center. doi: https://doi.org/10.5067/8W33RRS6S2RV. [Date Accessed].",
   "Literature Citation": "Kellndorfer, J. , O. Cartus, M. Lavalle,  C. Magnard, P. Milillo, S. Oveisgharan, B. Osmanoglu, P. Rosen, and U. Wegmuller. 2022. Global seasonal Sentinel-1 interferometric coherence and backscatter data set., Scientific Data. https://doi.org/10.1038/s41597-022-01189-6"
 }
