@@ -1,6 +1,7 @@
 {
   "type": "Collection",
   "id": "sentinel-1-global-coherence",
+  "title": "Global Seasonal Sentinel-1 Interferometric Coherence and Backscatter Data Set",
   "stac_version": "1.0.0",
   "description": "This data set is the first-of-its-kind spatial representation of multi-seasonal, global C-band Synthetic Aperture Radar (SAR) interferometric repeat-pass coherence and backscatter signatures. Coverage comprises land masses and ice sheets from 82° Northern to 79° Southern latitudes. The data set is derived from multi-temporal repeat-pass interferometric processing of about 205,000 Sentinel-1 C-band SAR images acquired in Interferometric Wide-Swath Mode from 1-Dec-2019 to 30-Nov-2020. The data set encompasses three sets of seasonal (December-February, March-May, June-August, September-November) metrics produced with a pixel spacing of three arcseconds: 1) Median 6-, 12-, 18-, 24-, 36-, and 48-days repeat-pass coherence at VV or HH polarizations, 2) Mean radiometrically terrain corrected backscatter (γ0) at VV and VH, or HH and HV polarizations, and 3) Estimated parameters of an exponential coherence decay model. The data set has been produced to obtain global, spatially detailed information on how decorrelation affects interferometric measurements of surface displacement and is rich in spatial and temporal information for a variety of mapping applications.",
   "links": [
