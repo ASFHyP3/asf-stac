@@ -30,8 +30,9 @@ def add_stac_object(stac_object: dict, api_url: str, session: requests.Session) 
     response = session.post(url, json=stac_object)
 
     if response.status_code == 409:
-        response = session.put(url, json=stac_object)
-    response.raise_for_status()
+        print('Skipping existing object')
+    else:
+        response.raise_for_status()
 
 
 def parse_args() -> argparse.Namespace:
