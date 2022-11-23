@@ -81,8 +81,8 @@ def construct_url(bucket: str, key: str):
 def get_object_urls(bucket: str, prefix: str, requester_pays: bool = False):
     kwargs = {'RequestPayer': 'requester'} if requester_pays else {}
     response = s3.list_objects_v2(Bucket=bucket, Prefix=prefix, **kwargs)
-    keys = [x['Key'] for x in response['Contents']]
-    urls = [construct_url(bucket, x) for x in keys]
+    keys = [obj['Key'] for obj in response['Contents']]
+    urls = [construct_url(bucket, key) for key in keys]
     return urls
 
 
@@ -130,7 +130,7 @@ def create_stac_item(yearly_assets: List[dict], seasonal_assets: List[dict]) -> 
     start_date = ex_asset['date_range'][0]
     end_date = ex_asset['date_range'][1]
     mid_date = start_date + (end_date - start_date) / 2
-    polarizations = list(set([x['polarization'].upper() for x in seasonal_assets]))
+    polarizations = list(set([asset['polarization'].upper() for asset in seasonal_assets]))
     properties = {
         'tileid': ex_asset['tileid'],
         'season': ex_asset['season'],
@@ -149,7 +149,7 @@ def create_stac_item(yearly_assets: List[dict], seasonal_assets: List[dict]) -> 
     ext_sar.apply(
         'IW',
         sar.FrequencyBand('C'),
-        [sar.Polarization(x) for x in polarizations],
+        [sar.Polarization(pol) for pol in polarizations],
         'COH',
         SENTINEL1_CENTER_FREQUENCY,
         looks_range=12,
@@ -184,14 +184,23 @@ def create_tile_stac_collection(
         date_interval: Tuple[datetime, datetime] = (datetime(2019, 12, 1), datetime(2020, 11, 30))
 ) -> pystac.collection.Collection:
     urls = get_object_urls(COHERENCE_DATA_BUCKET, prefix, requester_pays=True)
-    asset_dicts = [parse_url(x) for x in urls]
+    asset_dicts = [parse_url(url) for url in urls]
     items = []
 
-    yearly_assets = [x for x in asset_dicts if ('inc' in x['url']) or ('lsmap' in x['url'])]
-    seasons = [x['season'] for x in asset_dicts if not (('inc' in x['url']) or ('lsmap' in x['url']))]
+    yearly_assets = [
+        asset_dict for asset_dict in asset_dicts
+        if ('inc' in asset_dict['url']) or ('lsmap' in asset_dict['url'])
+    ]
+    seasons = [
+        asset_dict['season'] for asset_dict in asset_dicts
+        if not (('inc' in asset_dict['url']) or ('lsmap' in asset_dict['url']))
+    ]
     seasons = list(set(seasons))
     for season in seasons:
-        seasonal_assets = [x for x in asset_dicts if season.lower() in x['url']]
+        seasonal_assets = [
+            asset_dict for asset_dict in asset_dicts
+            if season.lower() in asset_dict['url']
+        ]
         item = create_stac_item(yearly_assets, seasonal_assets)
         items.append(item)
 
@@ -254,12 +263,12 @@ def get_all_tiles(prefix: str, requester_pays: bool = False) -> set:
 
     paginator = s3.get_paginator('list_objects_v2')
     page_iterator = paginator.paginate(**kwargs)
-    tile_set = set()
+    tile_set = set()  # TODO why a set?
     for page in page_iterator:
-        keys = [x['Key'] for x in page['Contents']]
-        page_tiles = [x.split('/')[2] for x in keys if '.' not in x.split('/')[2]]
+        keys = [obj['Key'] for obj in page['Contents']]
+        page_tiles = [key.split('/')[2] for key in keys if '.' not in key.split('/')[2]]
         tile_set.update(page_tiles)
-        break
+        break  # TODO why?
 
     return tile_set
 
@@ -278,11 +287,11 @@ def main():
 
     if args.tile_list:
         with open(args.tile_list, 'r') as f:
-            tiles = {x.strip() for x in f.readlines()}
+            tiles = {line.strip() for line in f.readlines()}
     else:
         tiles = get_all_tiles('data/tiles/')
 
-    prefixes = [f'data/tiles/{x}/' for x in tiles]
+    prefixes = [f'data/tiles/{tile}/' for tile in tiles]
 
     print('creating items...')
     with ThreadPoolExecutor(max_workers=20) as executor:
