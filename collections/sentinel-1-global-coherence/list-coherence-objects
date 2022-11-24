@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+aws s3 ls --recursive s3://sentinel-1-global-coherence-earthbigdata/data/tiles/ | cut -c '32-' | grep '.tif$' > coherence-s3-objects.txt

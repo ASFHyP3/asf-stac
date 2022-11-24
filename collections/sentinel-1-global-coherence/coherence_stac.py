@@ -263,12 +263,12 @@ def get_all_tiles(prefix: str, requester_pays: bool = False) -> set:
 
     paginator = s3.get_paginator('list_objects_v2')
     page_iterator = paginator.paginate(**kwargs)
-    tile_set = set()  # TODO why a set?
+    tile_set = set()
     for page in page_iterator:
         keys = [obj['Key'] for obj in page['Contents']]
         page_tiles = [key.split('/')[2] for key in keys if '.' not in key.split('/')[2]]
         tile_set.update(page_tiles)
-        break  # TODO why?
+        break
 
     return tile_set
 
