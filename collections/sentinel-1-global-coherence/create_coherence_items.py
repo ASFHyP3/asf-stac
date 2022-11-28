@@ -14,7 +14,7 @@ SEASON_DATE_RANGES = {
 
 
 # TODO metadata won't always have the required fields
-# TODO we can probably combine this with the parse_s3_key function
+# TODO use stac extension
 def create_stac_item(s3_key: str) -> dict:
     # TODO tests
     item_id = s3_key.split('/')[-1]  # TODO include this in metadata?
@@ -38,7 +38,7 @@ def create_stac_item(s3_key: str) -> dict:
         },
         "assets": {
             "DATA": {
-                "href": metadata['url'],
+                "href": get_url(s3_key),
                 "type": "image/tiff; application=geotiff",
             },
         },
@@ -54,7 +54,6 @@ def parse_s3_key(key: str) -> dict:
         tileid, _, product = parts
         bbox = tileid_to_bbox(tileid)
         metadata = {
-            'url': get_url(key),
             'bbox': bbox,
             'tileid': tileid,
             'product': product,
@@ -64,7 +63,6 @@ def parse_s3_key(key: str) -> dict:
         bbox = tileid_to_bbox(tileid)
         date_range = SEASON_DATE_RANGES[season]
         metadata = {
-            'url': get_url(key),
             'bbox': bbox,
             'tileid': tileid,
             'product': product,
