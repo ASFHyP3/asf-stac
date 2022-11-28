@@ -37,7 +37,7 @@ def create_stac_item(s3_key: str) -> dict:
             "end_datetime": metadata['date_range'][1],
             "sar:instrument_mode": "IW",
             "sar:frequency_band": "C",
-            "sar:polarizations": [metadata['polarization']],  # TODO is this correct?
+            "sar:polarizations": [metadata['polarization']],
             "sar:product_type": metadata['product'],  # TODO this was hard-coded to COH in Forrest's stac ext code?
             "sar:center_frequency": 5.405,
             "sar:looks_range": 12,
