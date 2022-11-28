@@ -39,8 +39,8 @@ def create_stac_item(s3_key: str) -> dict:
                 "type": "image/tiff; application=geotiff",
             },
         },
-        "bbox": [6.0, -1.0, 7.0, 0.0],  # TODO convert metadata['bbox'] to list
-        "collection": "sentinel-1-global-coherence"
+        "bbox": metadata['bbox'].bounds,
+        "collection": "sentinel-1-global-coherence",
     }
 
 
