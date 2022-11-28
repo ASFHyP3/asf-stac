@@ -53,6 +53,7 @@ def create_stac_item(s3_key: str) -> dict:
             },
         },
         "bbox": metadata['bbox'].bounds,
+        "stac_extensions": ["https://stac-extensions.github.io/sar/v1.0.0/schema.json"],
         "collection": "sentinel-1-global-coherence",
     }
 
