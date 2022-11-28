@@ -12,6 +12,13 @@ SEASON_DATE_RANGES = {
     'FALL': (datetime(2020, 9, 1), datetime(2020, 11, 30)),
 }
 
+SEASON_DATETIME_AVERAGES = {
+    'WINTER': datetime(2020, 1, 14, 12),
+    'SPRING': datetime(2020, 4, 15, 12),
+    'SUMMER': datetime(2020, 7, 16, 12),
+    'FALL': datetime(2020, 10, 16, 0),
+}
+
 
 # TODO metadata won't always have the required fields
 # TODO use stac extension
