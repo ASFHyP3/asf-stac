@@ -35,14 +35,14 @@ def create_stac_item(s3_key: str) -> dict:
             "season": metadata['season'],
             "start_datetime": metadata['date_range'][0],
             "end_datetime": metadata['date_range'][1],
-            "sar:instrument_mode": "IW",  # TODO is this variable?
-            "sar:frequency_band": "C",  # TODO is this variable?
+            "sar:instrument_mode": "IW",
+            "sar:frequency_band": "C",
             "sar:polarizations": [metadata['polarization']],  # TODO is this correct?
-            "sar:product_type": metadata['product'],
-            "sar:center_frequency": 5.405,  # TODO is this variable?
-            "sar:looks_range": 12,  # TODO is this variable?
-            "sar:looks_azimuth": 3,  # TODO is this variable?
-            "sar:observation_direction": "right",  # TODO is this variable?
+            "sar:product_type": metadata['product'],  # TODO this was hard-coded to COH in Forrest's stac ext code?
+            "sar:center_frequency": 5.405,
+            "sar:looks_range": 12,
+            "sar:looks_azimuth": 3,
+            "sar:observation_direction": "right",
             "datetime": metadata['datetime'],
         },
         "geometry": geometry.mapping(metadata['bbox']),
