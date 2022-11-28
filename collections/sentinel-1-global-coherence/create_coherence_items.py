@@ -32,10 +32,7 @@ def create_stac_item(s3_key: str) -> dict:
             "product_type": metadata['product'],
             "datetime": "2020-07-16T12:00:00Z",  # TODO where to find this?
         },
-        "geometry": {
-            "type": "Polygon",
-            "coordinates": [[[7.0, -1.0], [7.0, 0.0], [6.0, 0.0], [6.0, -1.0], [7.0, -1.0]]]  # TODO where to find this?
-        },
+        "geometry": geometry.mapping(metadata['bbox']),
         "assets": {
             "DATA": {
                 "href": get_url(s3_key),
