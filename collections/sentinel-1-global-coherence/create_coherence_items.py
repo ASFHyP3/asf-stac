@@ -37,7 +37,7 @@ def create_stac_item(s3_key: str) -> dict:
             "end_datetime": metadata['date_range'][1],
             "polarization": metadata['polarization'],
             "product_type": metadata['product'],
-            "datetime": "2020-07-16T12:00:00Z",  # TODO where to find this?
+            "datetime": metadata['datetime'],
         },
         "geometry": geometry.mapping(metadata['bbox']),
         "assets": {
@@ -65,12 +65,12 @@ def parse_s3_key(key: str) -> dict:
     else:
         tileid, season, polarization, product = parts
         bbox = tileid_to_bbox(tileid)
-        date_range = SEASON_DATE_RANGES[season]
         metadata = {
             'bbox': bbox,
             'tileid': tileid,
             'product': product,
-            'date_range': date_range,
+            'date_range': SEASON_DATE_RANGES[season],
+            'datetime': SEASON_DATETIME_AVERAGES[season],
             'season': season,
             'polarization': polarization,
         }
