@@ -46,9 +46,11 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
     session = requests.Session()
-    for json_file in glob(f'{args.json_dir}/*.json'):
+    json_files = glob(f'{args.json_dir}/*.json')
+    for count, json_file in enumerate(json_files, start=1):
         with open(json_file) as f:
             stac_object = json.load(f)
+        print(f'{count}/{len(json_files)} ', end='')
         add_stac_object(stac_object, args.api_url, session)
 
 
