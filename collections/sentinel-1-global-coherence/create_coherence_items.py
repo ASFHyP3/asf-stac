@@ -2,6 +2,7 @@ import argparse
 import json
 import os
 import urllib.parse
+from dataclasses import dataclass
 
 from datetime import datetime
 from pathlib import Path
@@ -24,6 +25,23 @@ SEASON_DATETIME_AVERAGES = {
     'SUMMER': datetime(2020, 7, 16, 12),
     'FALL': datetime(2020, 10, 16, 0),
 }
+
+
+@dataclass(frozen=True)
+class ExtraItemMetadata:
+    season: str
+    date_range: tuple[datetime, datetime]
+    datetime: datetime
+    polarization: str
+
+
+@dataclass(frozen=True)
+class ItemMetadata:
+    id: str
+    bbox: geometry.Polygon
+    tileid: str
+    product: str
+    extra: ExtraItemMetadata = None
 
 
 def get_s3_url() -> str:
@@ -50,12 +68,12 @@ def create_stac_item(s3_key: str, s3_url: str) -> dict:
     item = {
         "type": "Feature",
         "stac_version": "1.0.0",
-        "id": metadata['id'],
+        "id": metadata.id,
         "properties": {
-            "tileid": metadata['tileid'],
+            "tileid": metadata.tileid,
             "sar:instrument_mode": "IW",
             "sar:frequency_band": "C",
-            "sar:product_type": metadata['product'],  # TODO this was hard-coded to COH in Forrest's stac ext code?
+            "sar:product_type": metadata.product,  # TODO this was hard-coded to COH in Forrest's stac ext code?
             "sar:center_frequency": 5.405,
             "sar:looks_range": 12,
             "sar:looks_azimuth": 3,
@@ -63,25 +81,25 @@ def create_stac_item(s3_key: str, s3_url: str) -> dict:
             "start_datetime": datetime_to_str(SEASON_DATE_RANGES['WINTER'][0]),
             "end_datetime": datetime_to_str(SEASON_DATE_RANGES['FALL'][1]),
         },
-        "geometry": geometry.mapping(metadata['bbox']),
+        "geometry": geometry.mapping(metadata.bbox),
         "assets": {
             "DATA": {
                 "href": urllib.parse.urljoin(s3_url, s3_key),
                 "type": "image/tiff; application=geotiff",
             },
         },
-        "bbox": metadata['bbox'].bounds,
+        "bbox": metadata.bbox.bounds,
         "stac_extensions": ["https://stac-extensions.github.io/sar/v1.0.0/schema.json"],
         "collection": "sentinel-1-global-coherence",
     }
-    if 'extra-metadata' in metadata:
+    if metadata.extra:
         item['properties'].update(
             {
-                "season": metadata['extra-metadata']['season'],
-                "start_datetime": datetime_to_str(metadata['extra-metadata']['date_range'][0]),
-                "end_datetime": datetime_to_str(metadata['extra-metadata']['date_range'][1]),
-                "datetime": datetime_to_str(metadata['extra-metadata']['datetime']),
-                "sar:polarizations": [metadata['extra-metadata']['polarization']],
+                "season": metadata.extra.season,
+                "start_datetime": datetime_to_str(metadata.extra.date_range[0]),
+                "end_datetime": datetime_to_str(metadata.extra.date_range[1]),
+                "datetime": datetime_to_str(metadata.extra.datetime),
+                "sar:polarizations": [metadata.extra.polarization],
             }
         )
     return item
@@ -92,35 +110,40 @@ def datetime_to_str(dt: datetime) -> str:
     return dt.isoformat() + 'Z'
 
 
-def parse_s3_key(s3_key: str) -> dict:
+def parse_s3_key(s3_key: str) -> ItemMetadata:
     # TODO tests
-    item_id = os.path.splitext(s3_key.split('/')[-1])[0]
+    item_id = item_id_from_s3_key(s3_key)
     parts = item_id.upper().split('_')
     if len(parts) == 3:
         tileid, _, product = parts
         bbox = tileid_to_bbox(tileid)
-        metadata = {
-            'id': item_id,
-            'bbox': bbox,
-            'tileid': tileid,
-            'product': product,
-        }
+        metadata = ItemMetadata(
+            id=item_id,
+            bbox=bbox,
+            tileid=tileid,
+            product=product,
+        )
     else:
         tileid, season, polarization, product = parts
         bbox = tileid_to_bbox(tileid)
-        metadata = {
-            'id': item_id,
-            'bbox': bbox,
-            'tileid': tileid,
-            'product': product,
-            'extra-metadata': {
-                'season': season,
-                'date_range': SEASON_DATE_RANGES[season],
-                'datetime': SEASON_DATETIME_AVERAGES[season],
-                'polarization': polarization,
-            },
-        }
+        metadata = ItemMetadata(
+            id=item_id,
+            bbox=bbox,
+            tileid=tileid,
+            product=product,
+            extra=ExtraItemMetadata(
+                season=season,
+                date_range=SEASON_DATE_RANGES[season],
+                datetime=SEASON_DATETIME_AVERAGES[season],
+                polarization=polarization,
+            ),
+        )
     return metadata
+
+
+def item_id_from_s3_key(s3_key: str) -> str:
+    # TODO tests
+    return os.path.splitext(s3_key.split('/')[-1])[0]
 
 
 # TODO why is there an extra zero in N48W090, will this cause issues?
