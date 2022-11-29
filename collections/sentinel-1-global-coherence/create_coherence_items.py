@@ -142,8 +142,8 @@ def parse_s3_key(s3_key: str) -> ItemMetadata:
 
 
 def item_id_from_s3_key(s3_key: str) -> str:
-    # TODO tests
-    return os.path.splitext(s3_key.split('/')[-1])[0]
+    basename = s3_key.split('/')[-1]
+    return basename.split('.')[0]
 
 
 # TODO why is there an extra zero in N48W090, will this cause issues?

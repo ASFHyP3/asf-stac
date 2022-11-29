@@ -1,5 +1,6 @@
 from datetime import timedelta
 
+import create_coherence_items
 from create_coherence_items import SEASON_DATE_RANGES, SEASON_DATETIME_AVERAGES
 
 
@@ -19,3 +20,7 @@ def test_season_datetime_averages():
     assert SEASON_DATETIME_AVERAGES['FALL'] - SEASON_DATE_RANGES['FALL'][0] \
            == SEASON_DATE_RANGES['FALL'][1] - SEASON_DATETIME_AVERAGES['FALL'] \
            == timedelta(days=45)
+
+
+def test_item_id_from_s3_key():
+    assert create_coherence_items.item_id_from_s3_key('path/to/key.tif') == 'key'
