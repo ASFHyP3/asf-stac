@@ -9,9 +9,8 @@ Assumes that the STAC API supports the Transaction extension.
 
 import argparse
 import json
-import urllib
+import urllib.parse
 from glob import glob
-from urllib.parse import urljoin
 
 import requests
 
