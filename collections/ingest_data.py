@@ -9,19 +9,10 @@ Assumes that the STAC API supports the Transaction extension.
 
 import argparse
 import json
+import urllib
 from urllib.parse import urljoin
 
 import requests
-
-
-class ServerSession(requests.Session):
-    def __init__(self, prefix_url: str):
-        super(ServerSession, self).__init__()
-        self.prefix_url = prefix_url
-
-    def request(self, method, url, *args, **kwargs):
-        url = urljoin(self.prefix_url, url)
-        return super(ServerSession, self).request(method, url, *args, **kwargs)
 
 
 def get_endpoint(stac_object: dict) -> str:
@@ -33,10 +24,10 @@ def get_endpoint(stac_object: dict) -> str:
     return endpoint
 
 
-def add_stac_object(stac_object: dict, session: ServerSession) -> None:
+def add_stac_object(stac_object: dict, api_url: str, session: requests.Session) -> None:
     print(stac_object['id'])
-    endpoint = get_endpoint(stac_object)
-    response = session.post(endpoint, json=stac_object)
+    url = urllib.parse.urljoin(api_url, get_endpoint(stac_object))
+    response = session.post(url, json=stac_object)
 
     if response.status_code == 409:
         print('Skipping existing object')
@@ -53,11 +44,11 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
-    session = ServerSession(args.api_url)
+    session = requests.Session()
     for json_file in args.json_files:
         with open(json_file) as f:
             stac_object = json.load(f)
-        add_stac_object(stac_object, session)
+        add_stac_object(stac_object, args.api_url, session)
 
 
 if __name__ == '__main__':
