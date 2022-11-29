@@ -10,6 +10,7 @@ Assumes that the STAC API supports the Transaction extension.
 import argparse
 import json
 import urllib
+from glob import glob
 from urllib.parse import urljoin
 
 import requests
@@ -38,14 +39,14 @@ def add_stac_object(stac_object: dict, api_url: str, session: requests.Session) 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('api_url', help='URL for the STAC API.')
-    parser.add_argument('json_files', nargs='+', help='JSON files to ingest')
+    parser.add_argument('json_dir', help='Path to directory containing STAC item JSON files.')
     return parser.parse_args()
 
 
 def main() -> None:
     args = parse_args()
     session = requests.Session()
-    for json_file in args.json_files:
+    for json_file in glob(f'{args.json_dir}/*.json'):
         with open(json_file) as f:
             stac_object = json.load(f)
         add_stac_object(stac_object, args.api_url, session)
