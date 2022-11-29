@@ -44,16 +44,13 @@ def write_stac_items(s3_keys: list[str], s3_url: str) -> None:
             json.dump(item, f)
 
 
-# TODO metadata won't always have the required fields
-# TODO use stac extension
 def create_stac_item(s3_key: str, s3_url: str) -> dict:
     # TODO tests
-    item_id = s3_key.split('/')[-1]  # TODO include this in metadata?
     metadata = parse_s3_key(s3_key)
     item = {
         "type": "Feature",
         "stac_version": "1.0.0",
-        "id": item_id,
+        "id": metadata['id'],
         "properties": {
             "tileid": metadata['tileid'],
             "sar:instrument_mode": "IW",
@@ -63,6 +60,8 @@ def create_stac_item(s3_key: str, s3_url: str) -> dict:
             "sar:looks_range": 12,
             "sar:looks_azimuth": 3,
             "sar:observation_direction": "right",
+            "start_datetime": datetime_to_str(SEASON_DATE_RANGES['WINTER'][0]),
+            "end_datetime": datetime_to_str(SEASON_DATE_RANGES['FALL'][1]),
         },
         "geometry": geometry.mapping(metadata['bbox']),
         "assets": {
@@ -93,13 +92,15 @@ def datetime_to_str(dt: datetime) -> str:
     return dt.isoformat() + 'Z'
 
 
-def parse_s3_key(key: str) -> dict:
+def parse_s3_key(s3_key: str) -> dict:
     # TODO tests
-    parts = os.path.splitext(key.upper().split('/')[-1])[0].split('_')
+    item_id = os.path.splitext(s3_key.split('/')[-1])[0]
+    parts = item_id.upper().split('_')
     if len(parts) == 3:
         tileid, _, product = parts
         bbox = tileid_to_bbox(tileid)
         metadata = {
+            'id': item_id,
             'bbox': bbox,
             'tileid': tileid,
             'product': product,
@@ -108,6 +109,7 @@ def parse_s3_key(key: str) -> dict:
         tileid, season, polarization, product = parts
         bbox = tileid_to_bbox(tileid)
         metadata = {
+            'id': item_id,
             'bbox': bbox,
             'tileid': tileid,
             'product': product,
