@@ -1,9 +1,15 @@
 import argparse
+import json
+import os
+import urllib.parse
 
 from datetime import datetime
 from pathlib import Path
 
+import boto3
 from shapely import geometry
+
+s3 = boto3.client('s3')
 
 SEASON_DATE_RANGES = {
     'WINTER': (datetime(2019, 12, 1), datetime(2020, 2, 28)),
@@ -20,35 +26,48 @@ SEASON_DATETIME_AVERAGES = {
 }
 
 
+def get_s3_url() -> str:
+    bucket = 'sentinel-1-global-coherence-earthbigdata'
+    location = s3.get_bucket_location(Bucket=bucket)['LocationConstraint']
+    return f'https://{bucket}.s3.{location}.amazonaws.com'
+
+
+def write_stac_items(s3_keys: list[str], s3_url: str) -> None:
+    dirname = 'stac-items'
+    if not os.path.exists(dirname):
+        os.mkdir(dirname)
+
+    for count, s3_key in enumerate(s3_keys, start=1):
+        print(f'Creating STAC items: {count}/{len(s3_keys)}', end='\r')
+        item = create_stac_item(s3_key, s3_url)
+        with open(os.path.join(dirname, item['id'] + '.json'), 'w') as f:
+            json.dump(item, f)
+
+
 # TODO metadata won't always have the required fields
 # TODO use stac extension
-def create_stac_item(s3_key: str) -> dict:
+def create_stac_item(s3_key: str, s3_url: str) -> dict:
     # TODO tests
     item_id = s3_key.split('/')[-1]  # TODO include this in metadata?
     metadata = parse_s3_key(s3_key)
-    return {
+    item = {
         "type": "Feature",
         "stac_version": "1.0.0",
         "id": item_id,
         "properties": {
             "tileid": metadata['tileid'],
-            "season": metadata['season'],
-            "start_datetime": metadata['date_range'][0],
-            "end_datetime": metadata['date_range'][1],
             "sar:instrument_mode": "IW",
             "sar:frequency_band": "C",
-            "sar:polarizations": [metadata['polarization']],
             "sar:product_type": metadata['product'],  # TODO this was hard-coded to COH in Forrest's stac ext code?
             "sar:center_frequency": 5.405,
             "sar:looks_range": 12,
             "sar:looks_azimuth": 3,
             "sar:observation_direction": "right",
-            "datetime": metadata['datetime'],
         },
         "geometry": geometry.mapping(metadata['bbox']),
         "assets": {
             "DATA": {
-                "href": get_url(s3_key),
+                "href": urllib.parse.urljoin(s3_url, s3_key),
                 "type": "image/tiff; application=geotiff",
             },
         },
@@ -56,11 +75,27 @@ def create_stac_item(s3_key: str) -> dict:
         "stac_extensions": ["https://stac-extensions.github.io/sar/v1.0.0/schema.json"],
         "collection": "sentinel-1-global-coherence",
     }
+    if 'extra-metadata' in metadata:
+        item['properties'].update(
+            {
+                "season": metadata['extra-metadata']['season'],
+                "start_datetime": datetime_to_str(metadata['extra-metadata']['date_range'][0]),
+                "end_datetime": datetime_to_str(metadata['extra-metadata']['date_range'][1]),
+                "datetime": datetime_to_str(metadata['extra-metadata']['datetime']),
+                "sar:polarizations": [metadata['extra-metadata']['polarization']],
+            }
+        )
+    return item
+
+
+def datetime_to_str(dt: datetime) -> str:
+    # TODO can we assume utc?
+    return dt.isoformat() + 'Z'
 
 
 def parse_s3_key(key: str) -> dict:
     # TODO tests
-    parts = key.upper().split('/')[-1].split('_')
+    parts = os.path.splitext(key.upper().split('/')[-1])[0].split('_')
     if len(parts) == 3:
         tileid, _, product = parts
         bbox = tileid_to_bbox(tileid)
@@ -76,10 +111,12 @@ def parse_s3_key(key: str) -> dict:
             'bbox': bbox,
             'tileid': tileid,
             'product': product,
-            'date_range': SEASON_DATE_RANGES[season],
-            'datetime': SEASON_DATETIME_AVERAGES[season],
-            'season': season,
-            'polarization': polarization,
+            'extra-metadata': {
+                'season': season,
+                'date_range': SEASON_DATE_RANGES[season],
+                'datetime': SEASON_DATETIME_AVERAGES[season],
+                'polarization': polarization,
+            },
         }
     return metadata
 
@@ -103,6 +140,7 @@ def tileid_to_bbox(tileid: str) -> geometry.Polygon:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument('s3_objects', type=Path, help='Path to a text file containing the list of S3 objects')
+    parser.add_argument('-n', '--number-of-items', type=int, help='Number of items to create')
     return parser.parse_args()
 
 
@@ -110,9 +148,10 @@ def main():
     args = parse_args()
 
     with open(args.s3_objects, 'r') as f:
-        s3_keys = f.readlines()
+        s3_keys = f.read().splitlines()[:args.number_of_items]
 
-    # TODO generate stac items
+    s3_url = get_s3_url()
+    write_stac_items(s3_keys, s3_url)
 
 
 if __name__ == '__main__':
