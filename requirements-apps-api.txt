@@ -1,6 +1,6 @@
 mangum==0.16.0
 pygeofilter==0.2.0
 stac-fastapi.api==2.4.1
-stac-fastapi.extensions==2.4.1
+stac-fastapi.extensions==2.4.3
 stac-fastapi.pgstac==2.3.0
 stac-fastapi.types==2.4.1
