@@ -40,4 +40,3 @@ def test_bounding_box_from_tile_id():
 
     assert create_coherence_items.bounding_box_from_tile_id('S78W161') \
         == geometry.box(-161, -79, -160, -78)
-
