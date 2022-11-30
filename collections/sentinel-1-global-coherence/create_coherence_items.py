@@ -26,6 +26,13 @@ SEASON_DATETIME_AVERAGES = {
     'FALL': datetime(2020, 10, 16, 0),
 }
 
+COLLECTION_ID = 'sentinel-1-global-coherence'
+SAR_INSTRUMENT_MODE = 'IW'
+SAR_FREQUENCY_BAND = 'C'
+SAR_CENTER_FREQUENCY = 5.405
+SAR_LOOKS_RANGE = 12
+SAR_LOOKS_AZIMUTH = 3
+SAR_OBSERVATION_DIRECTION = 'right'
 
 @dataclass(frozen=True)
 class ExtraItemMetadata:
@@ -47,7 +54,7 @@ class ItemMetadata:
 def get_s3_url() -> str:
     bucket = 'sentinel-1-global-coherence-earthbigdata'
     location = s3.get_bucket_location(Bucket=bucket)['LocationConstraint']
-    return f'https://{bucket}.s3.{location}.amazonaws.com'
+    return f'https://{bucket}.s3.{location}.amazonaws.com/'
 
 
 def write_stac_items(s3_keys: list[str], s3_url: str) -> None:
@@ -62,6 +69,7 @@ def write_stac_items(s3_keys: list[str], s3_url: str) -> None:
             json.dump(item, f)
 
 
+# TODO fix quotes
 def create_stac_item(s3_key: str, s3_url: str) -> dict:
     # TODO tests
     metadata = parse_s3_key(s3_key)
@@ -71,13 +79,13 @@ def create_stac_item(s3_key: str, s3_url: str) -> dict:
         "id": metadata.id,
         "properties": {
             "tileid": metadata.tileid,
-            "sar:instrument_mode": "IW",
-            "sar:frequency_band": "C",
+            "sar:instrument_mode": SAR_INSTRUMENT_MODE,
+            "sar:frequency_band": SAR_FREQUENCY_BAND,
             "sar:product_type": metadata.product,  # TODO this was hard-coded to COH in Forrest's stac ext code?
-            "sar:center_frequency": 5.405,
-            "sar:looks_range": 12,
-            "sar:looks_azimuth": 3,
-            "sar:observation_direction": "right",
+            "sar:center_frequency": SAR_CENTER_FREQUENCY,
+            "sar:looks_range": SAR_LOOKS_RANGE,
+            "sar:looks_azimuth": SAR_LOOKS_AZIMUTH,
+            "sar:observation_direction": SAR_OBSERVATION_DIRECTION,
             "start_datetime": datetime_to_str(SEASON_DATE_RANGES['WINTER'][0]),
             "end_datetime": datetime_to_str(SEASON_DATE_RANGES['FALL'][1]),
         },
@@ -90,7 +98,7 @@ def create_stac_item(s3_key: str, s3_url: str) -> dict:
         },
         "bbox": metadata.bbox.bounds,
         "stac_extensions": ["https://stac-extensions.github.io/sar/v1.0.0/schema.json"],
-        "collection": "sentinel-1-global-coherence",
+        "collection": COLLECTION_ID,
     }
     if metadata.extra:
         item['properties'].update(
