@@ -66,6 +66,9 @@ def test_create_stac_item_N00E005_124D_inc():
            }
 
 
+# TODO add test_create_stac_item_ from spring or summer (so as to avoid duplicating default start or end datetime)
+
+
 def test_parse_s3_key():
     assert create_coherence_items.parse_s3_key('data/tiles/N00E005/N00E005_124D_inc.tif') \
         == create_coherence_items.ItemMetadata(
