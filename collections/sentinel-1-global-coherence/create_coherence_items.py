@@ -69,45 +69,44 @@ def write_stac_items(s3_keys: list[str], s3_url: str) -> None:
             json.dump(item, f)
 
 
-# TODO fix quotes
 def create_stac_item(s3_key: str, s3_url: str) -> dict:
     # TODO tests
     metadata = parse_s3_key(s3_key)
     item = {
-        "type": "Feature",
-        "stac_version": "1.0.0",
-        "id": metadata.id,
-        "properties": {
-            "tileid": metadata.tileid,
-            "sar:instrument_mode": SAR_INSTRUMENT_MODE,
-            "sar:frequency_band": SAR_FREQUENCY_BAND,
-            "sar:product_type": metadata.product,  # TODO this was hard-coded to COH in Forrest's stac ext code?
-            "sar:center_frequency": SAR_CENTER_FREQUENCY,
-            "sar:looks_range": SAR_LOOKS_RANGE,
-            "sar:looks_azimuth": SAR_LOOKS_AZIMUTH,
-            "sar:observation_direction": SAR_OBSERVATION_DIRECTION,
-            "start_datetime": datetime_to_str(SEASON_DATE_RANGES['WINTER'][0]),
-            "end_datetime": datetime_to_str(SEASON_DATE_RANGES['FALL'][1]),
+        'type': 'Feature',
+        'stac_version': '1.0.0',
+        'id': metadata.id,
+        'properties': {
+            'tileid': metadata.tileid,
+            'sar:instrument_mode': SAR_INSTRUMENT_MODE,
+            'sar:frequency_band': SAR_FREQUENCY_BAND,
+            'sar:product_type': metadata.product,  # TODO this was hard-coded to COH in Forrest's stac ext code?
+            'sar:center_frequency': SAR_CENTER_FREQUENCY,
+            'sar:looks_range': SAR_LOOKS_RANGE,
+            'sar:looks_azimuth': SAR_LOOKS_AZIMUTH,
+            'sar:observation_direction': SAR_OBSERVATION_DIRECTION,
+            'start_datetime': datetime_to_str(SEASON_DATE_RANGES['WINTER'][0]),
+            'end_datetime': datetime_to_str(SEASON_DATE_RANGES['FALL'][1]),
         },
-        "geometry": geometry.mapping(metadata.bbox),
-        "assets": {
-            "DATA": {
-                "href": urllib.parse.urljoin(s3_url, s3_key),
-                "type": "image/tiff; application=geotiff",
+        'geometry': geometry.mapping(metadata.bbox),
+        'assets': {
+            'DATA': {
+                'href': urllib.parse.urljoin(s3_url, s3_key),
+                'type': 'image/tiff; application=geotiff',
             },
         },
-        "bbox": metadata.bbox.bounds,
-        "stac_extensions": ["https://stac-extensions.github.io/sar/v1.0.0/schema.json"],
-        "collection": COLLECTION_ID,
+        'bbox': metadata.bbox.bounds,
+        'stac_extensions': ['https://stac-extensions.github.io/sar/v1.0.0/schema.json'],
+        'collection': COLLECTION_ID,
     }
     if metadata.extra:
         item['properties'].update(
             {
-                "season": metadata.extra.season,
-                "start_datetime": datetime_to_str(metadata.extra.date_range[0]),
-                "end_datetime": datetime_to_str(metadata.extra.date_range[1]),
-                "datetime": datetime_to_str(metadata.extra.datetime),
-                "sar:polarizations": [metadata.extra.polarization],
+                'season': metadata.extra.season,
+                'start_datetime': datetime_to_str(metadata.extra.date_range[0]),
+                'end_datetime': datetime_to_str(metadata.extra.date_range[1]),
+                'datetime': datetime_to_str(metadata.extra.datetime),
+                'sar:polarizations': [metadata.extra.polarization],
             }
         )
     return item

@@ -24,24 +24,23 @@ def test_season_datetime_averages():
            == timedelta(days=45)
 
 
-# TODO fix quotes
 def test_create_stac_item_N00E005_124D_inc():
     assert create_coherence_items.create_stac_item('data/tiles/N00E005/N00E005_124D_inc.tif', 'foo.com/') \
            == {
-               "type": "Feature",
-               "stac_version": "1.0.0",
-               "id": 'N00E005_124D_inc',
-               "properties": {
-                   "tileid": 'N00E005',
-                   "sar:instrument_mode": create_coherence_items.SAR_INSTRUMENT_MODE,
-                   "sar:frequency_band": create_coherence_items.SAR_FREQUENCY_BAND,
-                   "sar:product_type": 'INC',
-                   "sar:center_frequency": create_coherence_items.SAR_CENTER_FREQUENCY,
-                   "sar:looks_range": create_coherence_items.SAR_LOOKS_RANGE,
-                   "sar:looks_azimuth": create_coherence_items.SAR_LOOKS_AZIMUTH,
-                   "sar:observation_direction": create_coherence_items.SAR_OBSERVATION_DIRECTION,
-                   "start_datetime": '2019-12-01T00:00:00Z',
-                   "end_datetime": '2020-11-30T00:00:00Z',
+               'type': 'Feature',
+               'stac_version': '1.0.0',
+               'id': 'N00E005_124D_inc',
+               'properties': {
+                   'tileid': 'N00E005',
+                   'sar:instrument_mode': create_coherence_items.SAR_INSTRUMENT_MODE,
+                   'sar:frequency_band': create_coherence_items.SAR_FREQUENCY_BAND,
+                   'sar:product_type': 'INC',
+                   'sar:center_frequency': create_coherence_items.SAR_CENTER_FREQUENCY,
+                   'sar:looks_range': create_coherence_items.SAR_LOOKS_RANGE,
+                   'sar:looks_azimuth': create_coherence_items.SAR_LOOKS_AZIMUTH,
+                   'sar:observation_direction': create_coherence_items.SAR_OBSERVATION_DIRECTION,
+                   'start_datetime': '2019-12-01T00:00:00Z',
+                   'end_datetime': '2020-11-30T00:00:00Z',
                },
                'geometry': {
                    'type': 'Polygon',
@@ -55,15 +54,15 @@ def test_create_stac_item_N00E005_124D_inc():
                        ),
                    ),
                },
-               "assets": {
-                   "DATA": {
-                       "href": 'foo.com/data/tiles/N00E005/N00E005_124D_inc.tif',
-                       "type": "image/tiff; application=geotiff",
+               'assets': {
+                   'DATA': {
+                       'href': 'foo.com/data/tiles/N00E005/N00E005_124D_inc.tif',
+                       'type': 'image/tiff; application=geotiff',
                    },
                },
-               "bbox": (5, -1, 6, 0),
-               "stac_extensions": ["https://stac-extensions.github.io/sar/v1.0.0/schema.json"],
-               "collection": create_coherence_items.COLLECTION_ID,
+               'bbox': (5, -1, 6, 0),
+               'stac_extensions': ['https://stac-extensions.github.io/sar/v1.0.0/schema.json'],
+               'collection': create_coherence_items.COLLECTION_ID,
            }
 
 
