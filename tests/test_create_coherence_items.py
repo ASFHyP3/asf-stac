@@ -24,6 +24,10 @@ def test_season_datetime_averages():
            == timedelta(days=45)
 
 
+def test_item_id_from_s3_key():
+    assert create_coherence_items.item_id_from_s3_key('path/to/key.tif') == 'key'
+
+
 def test_bounding_box_from_tile_id():
     assert create_coherence_items.bounding_box_from_tile_id('N49E009') \
            == geometry.box(9, 48, 10, 49)
@@ -37,6 +41,3 @@ def test_bounding_box_from_tile_id():
     assert create_coherence_items.bounding_box_from_tile_id('S78W161') \
         == geometry.box(-161, -79, -160, -78)
 
-
-def test_item_id_from_s3_key():
-    assert create_coherence_items.item_id_from_s3_key('path/to/key.tif') == 'key'
