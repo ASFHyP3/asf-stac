@@ -107,6 +107,7 @@ def create_stac_item(s3_key: str, s3_url: str) -> dict:
 
 def datetime_to_str(dt: datetime) -> str:
     # TODO can we assume utc?
+    # TODO tests
     return dt.isoformat() + 'Z'
 
 
