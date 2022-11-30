@@ -116,7 +116,7 @@ def parse_s3_key(s3_key: str) -> ItemMetadata:
     parts = item_id.upper().split('_')
     if len(parts) == 3:
         tileid, _, product = parts
-        bbox = tileid_to_bbox(tileid)
+        bbox = bounding_box_from_tile_id(tileid)
         metadata = ItemMetadata(
             id=item_id,
             bbox=bbox,
@@ -125,7 +125,7 @@ def parse_s3_key(s3_key: str) -> ItemMetadata:
         )
     else:
         tileid, season, polarization, product = parts
-        bbox = tileid_to_bbox(tileid)
+        bbox = bounding_box_from_tile_id(tileid)
         metadata = ItemMetadata(
             id=item_id,
             bbox=bbox,
@@ -146,20 +146,23 @@ def item_id_from_s3_key(s3_key: str) -> str:
     return basename.split('.')[0]
 
 
-# TODO why is there an extra zero in N48W090, will this cause issues?
-def tileid_to_bbox(tileid: str) -> geometry.Polygon:
-    # TODO tests
-    north = int(tileid[1:3])
-    if tileid[0] == 'S':
-        north *= -1
-    south = north - 1
+def bounding_box_from_tile_id(tileid: str) -> geometry.Polygon:
+    # "Tiles in the data set are labeled by the upper left coordinate of each 1x1 degree tile"
+    # http://sentinel-1-global-coherence-earthbigdata.s3-website-us-west-2.amazonaws.com/#organization
 
-    west = int(tileid[4:7])
-    if tileid[3] == 'W':
-        west *= -1
-    east = west + 1
-    bbox = geometry.box(west, south, east, north)
-    return bbox
+    lat = tileid[0]
+    latval = int(tileid[1:3])
+
+    lon = tileid[3]
+    lonval = int(tileid[4:7])
+
+    max_y = latval if lat == 'N' else -latval
+    min_y = max_y - 1
+
+    min_x = lonval if lon == 'E' else -lonval
+    max_x = min_x + 1
+
+    return geometry.box(min_x, min_y, max_x, max_y)
 
 
 def parse_args() -> argparse.Namespace:
