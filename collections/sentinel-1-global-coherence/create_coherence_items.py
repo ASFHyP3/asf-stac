@@ -111,7 +111,6 @@ def datetime_to_str(dt: datetime) -> str:
 
 
 def parse_s3_key(s3_key: str) -> ItemMetadata:
-    # TODO tests
     item_id = item_id_from_s3_key(s3_key)
     parts = item_id.upper().split('_')
     if len(parts) == 3:
