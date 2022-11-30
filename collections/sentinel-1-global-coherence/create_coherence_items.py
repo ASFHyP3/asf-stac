@@ -182,7 +182,7 @@ def parse_args() -> argparse.Namespace:
 def main():
     args = parse_args()
 
-    with open(args.s3_objects, 'r') as f:
+    with open(args.s3_objects) as f:
         s3_keys = f.read().splitlines()[:args.number_of_items]
 
     s3_url = get_s3_url()
