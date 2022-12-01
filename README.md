@@ -22,8 +22,6 @@ conda activate asf-stac
 
 ## Requirements for connecting to the database
 
-Refer to this section when manually connecting to the database or when running the API locally.
-
 The database only accepts connections from within the ASF Full VPN or from clients
 with the client security group attached. See the ingress rules for the database security group in the
 [database CloudFormation template](apps/database/cloudformation.yml).
@@ -47,8 +45,8 @@ make psql db_host=<host> db_user=<user> db_password=<password>
 You can run the STAC API frontend locally and it will automatically connect to the AWS-hosted database.
 
 The local API provides access to the Transaction extension (which provides create/update/delete endpoints),
-while the publicly available API does not. Therefore, if you need access to the Transaction endpoints, you
-must run the API locally:
+while the publicly available API does not. Therefore, if you need access to the Transaction endpoints for
+any reason, you must run the API locally:
 
 ```
 make run-api db_host=<host> db_admin_password=<password>
@@ -63,10 +61,26 @@ under the "Transaction Extension" heading. You should be able to successfully qu
 the local API, but not via the publicly available API. (TODO: after removing those endpoints completely
 from the public API, update this paragraph to reflect that they will no longer appear in the Swagger UI.)
 
-## Ingesting a STAC dataset
+## Creating and ingesting the coherence dataset
 
-Run `python ingest_data.py -h` for usage instructions. You must run the ingest script against
-a locally running API, as the script requires access to the Transaction endpoints.
+Fetch the list of S3 objects:
+
+```
+cd collections/sentinel-1-global-coherence/
+./list-coherence-objects
+```
+
+The list should be written to `coherence-s3-objects.txt`. Next, for help using the creation script, run:
+
+```
+python create_coherence_items.py -h
+```
+
+The creation script should write the entire dataset to a `.ndjson` file. Finally, to ingest the dataset, run:
+
+```
+make pypgstac-load db_host=<host> db_admin_password=<password> ndjson_file=<path>
+```
 
 ## Upgrading the database
 
