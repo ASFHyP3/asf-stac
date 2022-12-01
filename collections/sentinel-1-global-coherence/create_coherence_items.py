@@ -1,6 +1,5 @@
 import argparse
 import json
-import os
 import urllib.parse
 from dataclasses import dataclass
 
@@ -67,14 +66,14 @@ def get_s3_url() -> str:
 
 
 def write_stac_items(s3_keys: list[str], s3_url: str) -> None:
-    dirname = 'stac-items'
-    if not os.path.exists(dirname):
-        os.mkdir(dirname)
+    dirpath = Path('stac-items')
+    dirpath.mkdir(exist_ok=True)
 
     for count, s3_key in enumerate(s3_keys, start=1):
         print(f'Creating STAC items: {count}/{len(s3_keys)}', end='\r')
         stac_item = create_stac_item(s3_key, s3_url)
-        with open(os.path.join(dirname, stac_item['id'] + '.json'), 'w') as f:
+        json_path = dirpath / (stac_item['id'] + '.json')
+        with json_path.open('w') as f:
             f.write(jsonify_stac_item(stac_item))
 
 
@@ -190,7 +189,7 @@ def parse_args() -> argparse.Namespace:
 def main():
     args = parse_args()
 
-    with open(args.s3_objects) as f:
+    with args.s3_objects.open() as f:
         s3_keys = f.read().splitlines()[:args.number_of_items]
 
     s3_url = get_s3_url()
