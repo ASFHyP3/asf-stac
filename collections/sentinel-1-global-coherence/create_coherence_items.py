@@ -89,7 +89,6 @@ def jsonify_stac_item(stac_item: dict) -> str:
 
 
 def create_stac_item(s3_key: str, s3_url: str) -> dict:
-    # TODO tests
     metadata = parse_s3_key(s3_key)
     item = {
         'type': 'Feature',
