@@ -71,9 +71,20 @@ def write_stac_items(s3_keys: list[str], s3_url: str) -> None:
 
     for count, s3_key in enumerate(s3_keys, start=1):
         print(f'Creating STAC items: {count}/{len(s3_keys)}', end='\r')
-        item = create_stac_item(s3_key, s3_url)
-        with open(os.path.join(dirname, item['id'] + '.json'), 'w') as f:
-            json.dump(item, f)
+        stac_item = create_stac_item(s3_key, s3_url)
+        with open(os.path.join(dirname, stac_item['id'] + '.json'), 'w') as f:
+            f.write(jsonify_stac_item(stac_item))
+
+
+def jsonify_stac_item(stac_item: dict) -> str:
+    class DateTimeEncoder(json.JSONEncoder):
+        def default(self, obj):
+            if isinstance(obj, datetime):
+                # TODO can we assume utc?
+                return obj.isoformat() + 'Z'
+            return json.JSONEncoder.default(self, obj)
+
+    return json.dumps(stac_item, cls=DateTimeEncoder)
 
 
 def create_stac_item(s3_key: str, s3_url: str) -> dict:
@@ -88,8 +99,8 @@ def create_stac_item(s3_key: str, s3_url: str) -> dict:
             'sar:instrument_mode': SAR_INSTRUMENT_MODE,
             'sar:frequency_band': SAR_FREQUENCY_BAND,
             'sar:product_type': metadata.product,  # TODO this was hard-coded to COH in Forrest's stac ext code?
-            'start_datetime': datetime_to_str(SEASONS['winter']['start_datetime']),
-            'end_datetime': datetime_to_str(SEASONS['fall']['end_datetime']),
+            'start_datetime': SEASONS['winter']['start_datetime'],
+            'end_datetime': SEASONS['fall']['end_datetime'],
         },
         'geometry': geometry.mapping(metadata.bbox),
         'assets': {
@@ -106,19 +117,13 @@ def create_stac_item(s3_key: str, s3_url: str) -> dict:
         item['properties'].update(
             {
                 'season': metadata.extra.season,
-                'start_datetime': datetime_to_str(metadata.extra.start_datetime),
-                'end_datetime': datetime_to_str(metadata.extra.end_datetime),
-                'datetime': datetime_to_str(metadata.extra.datetime),
+                'start_datetime': metadata.extra.start_datetime,
+                'end_datetime': metadata.extra.end_datetime,
+                'datetime': metadata.extra.datetime,
                 'sar:polarizations': [metadata.extra.polarization],
             }
         )
     return item
-
-
-def datetime_to_str(dt: datetime) -> str:
-    # TODO can we assume utc?
-    # TODO tests
-    return dt.isoformat() + 'Z'
 
 
 def parse_s3_key(s3_key: str) -> ItemMetadata:

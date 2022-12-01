@@ -24,6 +24,26 @@ def test_season_datetime_averages():
            == timedelta(days=45)
 
 
+def test_jsonify_stac_item():
+    assert create_coherence_items.jsonify_stac_item(
+        {
+            'str_field': 'foo',
+            'int_field': 5,
+            'float_field': 3.1,
+            'bool_field': True,
+            'null_field': None,
+            'dict_field': {'str_field': 'bar'},
+            'list_field': [[1, 2], [3, 4]],
+            'tuple_field': ((1, 2), (3, 4)),
+            'datetime_field': datetime(2022, 11, 30, 12),
+        }
+    ) == (
+        '{"str_field": "foo", "int_field": 5, "float_field": 3.1, "bool_field": true, "null_field": null, '
+        '"dict_field": {"str_field": "bar"}, "list_field": [[1, 2], [3, 4]], "tuple_field": [[1, 2], [3, 4]], '
+        '"datetime_field": "2022-11-30T12:00:00Z"}'
+    )
+
+
 def test_create_stac_item_N00E005_124D_inc():
     assert create_coherence_items.create_stac_item('data/tiles/N00E005/N00E005_124D_inc.tif', 'foo.com/') \
            == {
@@ -35,8 +55,8 @@ def test_create_stac_item_N00E005_124D_inc():
                    'sar:instrument_mode': create_coherence_items.SAR_INSTRUMENT_MODE,
                    'sar:frequency_band': create_coherence_items.SAR_FREQUENCY_BAND,
                    'sar:product_type': 'inc',
-                   'start_datetime': '2019-12-01T00:00:00Z',
-                   'end_datetime': '2020-11-30T00:00:00Z',
+                   'start_datetime': datetime(2019, 12, 1),
+                   'end_datetime': datetime(2020, 11, 30),
                },
                'geometry': {
                    'type': 'Polygon',
@@ -74,9 +94,9 @@ def test_create_stac_item_S78W078_summer_hh_AMP():
                    'sar:frequency_band': create_coherence_items.SAR_FREQUENCY_BAND,
                    'sar:polarizations': ['HH'],
                    'sar:product_type': 'AMP',
-                   'start_datetime': '2020-06-01T00:00:00Z',
-                   'end_datetime': '2020-08-31T00:00:00Z',
-                   'datetime': '2020-07-16T12:00:00Z',
+                   'start_datetime': datetime(2020, 6, 1),
+                   'end_datetime': datetime(2020, 8, 31),
+                   'datetime': datetime(2020, 7, 16, 12),
                    'season': 'summer',
                },
                'geometry': {
