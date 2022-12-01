@@ -66,7 +66,7 @@ def get_s3_url() -> str:
 
 
 def write_stac_items(s3_keys: list[str], s3_url: str, output_file: str) -> None:
-    with open(output_file, 'w') as f:
+    with output_file.open('w') as f:
         for count, s3_key in enumerate(s3_keys, start=1):
             print(f'Creating STAC items: {count}/{len(s3_keys)}', end='\r')
             stac_item = create_stac_item(s3_key, s3_url)
