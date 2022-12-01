@@ -66,7 +66,45 @@ def test_create_stac_item_N00E005_124D_inc():
            }
 
 
-# TODO add test_create_stac_item_ from spring or summer (so as to avoid duplicating default start or end datetime)
+def test_create_stac_item_S78W078_summer_hh_AMP():
+    assert create_coherence_items.create_stac_item('data/tiles/S78W078/S78W078_summer_hh_AMP.tif', 'bar.com/') \
+           == {
+               'type': 'Feature',
+               'stac_version': '1.0.0',
+               'id': 'S78W078_summer_hh_AMP',
+               'properties': {
+                   'tile': 'S78W078',
+                   'sar:instrument_mode': create_coherence_items.SAR_INSTRUMENT_MODE,
+                   'sar:frequency_band': create_coherence_items.SAR_FREQUENCY_BAND,
+                   'sar:polarizations': ['HH'],
+                   'sar:product_type': 'AMP',
+                   'start_datetime': '2020-06-01T00:00:00Z',
+                   'end_datetime': '2020-08-31T00:00:00Z',
+                   'datetime': '2020-07-16T12:00:00Z',
+                   'season': 'summer',
+               },
+               'geometry': {
+                   'type': 'Polygon',
+                   'coordinates': (
+                       (
+                           (-77.0, -79.0),
+                           (-77.0, -78.0),
+                           (-78.0, -78.0),
+                           (-78.0, -79.0),
+                           (-77.0, -79.0),
+                       ),
+                   ),
+               },
+               'assets': {
+                   'data': {
+                       'href': 'bar.com/data/tiles/S78W078/S78W078_summer_hh_AMP.tif',
+                       'type': 'image/tiff; application=geotiff',
+                   },
+               },
+               'bbox': (-78, -79, -77, -78),
+               'stac_extensions': ['https://stac-extensions.github.io/sar/v1.0.0/schema.json'],
+               'collection': create_coherence_items.COLLECTION_ID,
+           }
 
 
 def test_parse_s3_key():
