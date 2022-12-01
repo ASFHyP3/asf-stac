@@ -5,7 +5,7 @@ import urllib.parse
 from dataclasses import dataclass
 
 from datetime import datetime, timezone
-from pathlib import Path
+from pathlib import Path, PurePath
 
 import boto3
 from shapely import geometry
@@ -158,8 +158,7 @@ def parse_s3_key(s3_key: str) -> ItemMetadata:
 
 
 def item_id_from_s3_key(s3_key: str) -> str:
-    basename = s3_key.split('/')[-1]
-    return basename.split('.')[0]
+    return PurePath(s3_key).stem
 
 
 def bounding_box_from_tile(tile: str) -> geometry.Polygon:
