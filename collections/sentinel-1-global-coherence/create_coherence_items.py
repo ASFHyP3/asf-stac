@@ -178,7 +178,7 @@ def bounding_box_from_tile(tile: str) -> geometry.Polygon:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument('s3_objects', type=Path, help='Path to a text file containing the list of S3 objects')
-    parser.add_argument('-o', '--output-file', type=str, help='Name of the output file',
+    parser.add_argument('-o', '--output-file', type=Path, help='Path for the output file',
                         default='sentinel-1-global-coherence.ndjson')
     parser.add_argument('-n', '--number-of-items', type=int, help='Number of items to create')
     return parser.parse_args()
