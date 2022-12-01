@@ -65,16 +65,12 @@ def get_s3_url() -> str:
     return f'https://{bucket}.s3.{location}.amazonaws.com/'
 
 
-def write_stac_items(s3_keys: list[str], s3_url: str) -> None:
-    dirpath = Path('stac-items')
-    dirpath.mkdir(exist_ok=True)
-
-    for count, s3_key in enumerate(s3_keys, start=1):
-        print(f'Creating STAC items: {count}/{len(s3_keys)}', end='\r')
-        stac_item = create_stac_item(s3_key, s3_url)
-        json_path = dirpath / (stac_item['id'] + '.json')
-        with json_path.open('w') as f:
-            f.write(jsonify_stac_item(stac_item))
+def write_stac_items(s3_keys: list[str], s3_url: str, output_file: Path) -> None:
+    with output_file.open('w') as f:
+        for count, s3_key in enumerate(s3_keys, start=1):
+            print(f'Creating STAC items: {count}/{len(s3_keys)}', end='\r')
+            stac_item = create_stac_item(s3_key, s3_url)
+            f.write(jsonify_stac_item(stac_item) + '\n')
 
 
 def jsonify_stac_item(stac_item: dict) -> str:
@@ -182,6 +178,8 @@ def bounding_box_from_tile(tile: str) -> geometry.Polygon:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument('s3_objects', type=Path, help='Path to a text file containing the list of S3 objects')
+    parser.add_argument('-o', '--output-file', type=Path, help='Path for the output file',
+                        default='sentinel-1-global-coherence.ndjson')
     parser.add_argument('-n', '--number-of-items', type=int, help='Number of items to create')
     return parser.parse_args()
 
@@ -193,7 +191,7 @@ def main():
         s3_keys = f.read().splitlines()[:args.number_of_items]
 
     s3_url = get_s3_url()
-    write_stac_items(s3_keys, s3_url)
+    write_stac_items(s3_keys, s3_url, args.output_file)
 
 
 if __name__ == '__main__':
