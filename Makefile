@@ -50,6 +50,9 @@ run-api:
 	    POSTGRES_DBNAME=postgres POSTGRES_USER=postgres POSTGRES_PASS=${db_admin_password} \
 	    python -m stac_fastapi.pgstac.app
 
+test:
+	PYTHONPATH=${PWD}/collections/sentinel-1-global-coherence/ python -m pytest tests/
+
 static: flake8 cfn-lint
 
 flake8:
