@@ -12,18 +12,27 @@ from shapely import geometry
 
 s3 = boto3.client('s3')
 
-SEASON_DATE_RANGES = {
-    'winter': (datetime(2019, 12, 1), datetime(2020, 2, 28)),
-    'spring': (datetime(2020, 3, 1), datetime(2020, 5, 31)),
-    'summer': (datetime(2020, 6, 1), datetime(2020, 8, 31)),
-    'fall': (datetime(2020, 9, 1), datetime(2020, 11, 30)),
-}
-
-SEASON_DATETIME_AVERAGES = {
-    'winter': datetime(2020, 1, 14, 12),
-    'spring': datetime(2020, 4, 15, 12),
-    'summer': datetime(2020, 7, 16, 12),
-    'fall': datetime(2020, 10, 16, 0),
+SEASONS = {
+    'winter': {
+        'start_datetime': datetime(2019, 12, 1),
+        'end_datetime': datetime(2020, 2, 28),
+        'datetime': datetime(2020, 1, 14, 12),
+    },
+    'spring': {
+        'start_datetime': datetime(2020, 3, 1),
+        'end_datetime': datetime(2020, 5, 31),
+        'datetime': datetime(2020, 4, 15, 12),
+    },
+    'summer': {
+        'start_datetime': datetime(2020, 6, 1),
+        'end_datetime': datetime(2020, 8, 31),
+        'datetime': datetime(2020, 7, 16, 12),
+    },
+    'fall': {
+        'start_datetime': datetime(2020, 9, 1),
+        'end_datetime': datetime(2020, 11, 30),
+        'datetime': datetime(2020, 10, 16, 0),
+    },
 }
 
 COLLECTION_ID = 'sentinel-1-global-coherence'
@@ -34,10 +43,12 @@ SAR_LOOKS_RANGE = 12
 SAR_LOOKS_AZIMUTH = 3
 SAR_OBSERVATION_DIRECTION = 'right'
 
+
 @dataclass(frozen=True)
 class ExtraItemMetadata:
     season: str
-    date_range: tuple[datetime, datetime]
+    start_datetime: datetime
+    end_datetime: datetime
     datetime: datetime
     polarization: str
 
@@ -81,8 +92,8 @@ def create_stac_item(s3_key: str, s3_url: str) -> dict:
             'sar:instrument_mode': SAR_INSTRUMENT_MODE,
             'sar:frequency_band': SAR_FREQUENCY_BAND,
             'sar:product_type': metadata.product,  # TODO this was hard-coded to COH in Forrest's stac ext code?
-            'start_datetime': datetime_to_str(SEASON_DATE_RANGES['winter'][0]),
-            'end_datetime': datetime_to_str(SEASON_DATE_RANGES['fall'][1]),
+            'start_datetime': datetime_to_str(SEASONS['winter']['start_datetime']),
+            'end_datetime': datetime_to_str(SEASONS['fall']['end_datetime']),
         },
         'geometry': geometry.mapping(metadata.bbox),
         'assets': {
@@ -99,8 +110,8 @@ def create_stac_item(s3_key: str, s3_url: str) -> dict:
         item['properties'].update(
             {
                 'season': metadata.extra.season,
-                'start_datetime': datetime_to_str(metadata.extra.date_range[0]),
-                'end_datetime': datetime_to_str(metadata.extra.date_range[1]),
+                'start_datetime': datetime_to_str(metadata.extra.start_datetime),
+                'end_datetime': datetime_to_str(metadata.extra.end_datetime),
                 'datetime': datetime_to_str(metadata.extra.datetime),
                 'sar:polarizations': [metadata.extra.polarization],
             }
@@ -136,8 +147,9 @@ def parse_s3_key(s3_key: str) -> ItemMetadata:
             product=product,
             extra=ExtraItemMetadata(
                 season=season,
-                date_range=SEASON_DATE_RANGES[season],
-                datetime=SEASON_DATETIME_AVERAGES[season],
+                start_datetime=SEASONS[season]['start_datetime'],
+                end_datetime=SEASONS[season]['end_datetime'],
+                datetime=SEASONS[season]['datetime'],
                 polarization=polarization.upper(),
             ),
         )

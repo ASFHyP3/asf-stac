@@ -3,24 +3,24 @@ from datetime import datetime, timedelta
 from shapely import geometry
 
 import create_coherence_items
-from create_coherence_items import SEASON_DATE_RANGES, SEASON_DATETIME_AVERAGES
+from create_coherence_items import SEASONS
 
 
 def test_season_datetime_averages():
-    assert SEASON_DATETIME_AVERAGES['winter'] - SEASON_DATE_RANGES['winter'][0] \
-        == SEASON_DATE_RANGES['winter'][1] - SEASON_DATETIME_AVERAGES['winter'] \
+    assert SEASONS['winter']['datetime'] - SEASONS['winter']['start_datetime'] \
+        == SEASONS['winter']['end_datetime'] - SEASONS['winter']['datetime'] \
         == timedelta(days=44, seconds=43200)
 
-    assert SEASON_DATETIME_AVERAGES['spring'] - SEASON_DATE_RANGES['spring'][0] \
-           == SEASON_DATE_RANGES['spring'][1] - SEASON_DATETIME_AVERAGES['spring'] \
+    assert SEASONS['spring']['datetime'] - SEASONS['spring']['start_datetime'] \
+           == SEASONS['spring']['end_datetime'] - SEASONS['spring']['datetime'] \
            == timedelta(days=45, seconds=43200)
 
-    assert SEASON_DATETIME_AVERAGES['summer'] - SEASON_DATE_RANGES['summer'][0] \
-           == SEASON_DATE_RANGES['summer'][1] - SEASON_DATETIME_AVERAGES['summer'] \
+    assert SEASONS['summer']['datetime'] - SEASONS['summer']['start_datetime'] \
+           == SEASONS['summer']['end_datetime'] - SEASONS['summer']['datetime'] \
            == timedelta(days=45, seconds=43200)
 
-    assert SEASON_DATETIME_AVERAGES['fall'] - SEASON_DATE_RANGES['fall'][0] \
-           == SEASON_DATE_RANGES['fall'][1] - SEASON_DATETIME_AVERAGES['fall'] \
+    assert SEASONS['fall']['datetime'] - SEASONS['fall']['start_datetime'] \
+           == SEASONS['fall']['end_datetime'] - SEASONS['fall']['datetime'] \
            == timedelta(days=45)
 
 
@@ -120,7 +120,8 @@ def test_parse_s3_key():
             product='AMP',
             extra=create_coherence_items.ExtraItemMetadata(
                 season='fall',
-                date_range=(datetime(2020, 9, 1), datetime(2020, 11, 30)),
+                start_datetime=datetime(2020, 9, 1),
+                end_datetime=datetime(2020, 11, 30),
                 datetime=datetime(2020, 10, 16, 0),
                 polarization='VH',
             ),
@@ -134,7 +135,8 @@ def test_parse_s3_key():
             product='COH36',
             extra=create_coherence_items.ExtraItemMetadata(
                 season='winter',
-                date_range=(datetime(2019, 12, 1), datetime(2020, 2, 28)),
+                start_datetime=datetime(2019, 12, 1),
+                end_datetime=datetime(2020, 2, 28),
                 datetime=datetime(2020, 1, 14, 12),
                 polarization='VV',
             ),
