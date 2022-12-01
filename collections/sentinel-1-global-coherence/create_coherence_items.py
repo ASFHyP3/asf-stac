@@ -13,17 +13,17 @@ from shapely import geometry
 s3 = boto3.client('s3')
 
 SEASON_DATE_RANGES = {
-    'WINTER': (datetime(2019, 12, 1), datetime(2020, 2, 28)),
-    'SPRING': (datetime(2020, 3, 1), datetime(2020, 5, 31)),
-    'SUMMER': (datetime(2020, 6, 1), datetime(2020, 8, 31)),
-    'FALL': (datetime(2020, 9, 1), datetime(2020, 11, 30)),
+    'winter': (datetime(2019, 12, 1), datetime(2020, 2, 28)),
+    'spring': (datetime(2020, 3, 1), datetime(2020, 5, 31)),
+    'summer': (datetime(2020, 6, 1), datetime(2020, 8, 31)),
+    'fall': (datetime(2020, 9, 1), datetime(2020, 11, 30)),
 }
 
 SEASON_DATETIME_AVERAGES = {
-    'WINTER': datetime(2020, 1, 14, 12),
-    'SPRING': datetime(2020, 4, 15, 12),
-    'SUMMER': datetime(2020, 7, 16, 12),
-    'FALL': datetime(2020, 10, 16, 0),
+    'winter': datetime(2020, 1, 14, 12),
+    'spring': datetime(2020, 4, 15, 12),
+    'summer': datetime(2020, 7, 16, 12),
+    'fall': datetime(2020, 10, 16, 0),
 }
 
 COLLECTION_ID = 'sentinel-1-global-coherence'
@@ -46,7 +46,7 @@ class ExtraItemMetadata:
 class ItemMetadata:
     id: str
     bbox: geometry.Polygon
-    tileid: str
+    tile: str
     product: str
     extra: ExtraItemMetadata = None
 
@@ -77,20 +77,16 @@ def create_stac_item(s3_key: str, s3_url: str) -> dict:
         'stac_version': '1.0.0',
         'id': metadata.id,
         'properties': {
-            'tileid': metadata.tileid,
+            'tile': metadata.tile,
             'sar:instrument_mode': SAR_INSTRUMENT_MODE,
             'sar:frequency_band': SAR_FREQUENCY_BAND,
             'sar:product_type': metadata.product,  # TODO this was hard-coded to COH in Forrest's stac ext code?
-            'sar:center_frequency': SAR_CENTER_FREQUENCY,
-            'sar:looks_range': SAR_LOOKS_RANGE,
-            'sar:looks_azimuth': SAR_LOOKS_AZIMUTH,
-            'sar:observation_direction': SAR_OBSERVATION_DIRECTION,
-            'start_datetime': datetime_to_str(SEASON_DATE_RANGES['WINTER'][0]),
-            'end_datetime': datetime_to_str(SEASON_DATE_RANGES['FALL'][1]),
+            'start_datetime': datetime_to_str(SEASON_DATE_RANGES['winter'][0]),
+            'end_datetime': datetime_to_str(SEASON_DATE_RANGES['fall'][1]),
         },
         'geometry': geometry.mapping(metadata.bbox),
         'assets': {
-            'DATA': {
+            'data': {
                 'href': urllib.parse.urljoin(s3_url, s3_key),
                 'type': 'image/tiff; application=geotiff',
             },
@@ -120,29 +116,29 @@ def datetime_to_str(dt: datetime) -> str:
 
 def parse_s3_key(s3_key: str) -> ItemMetadata:
     item_id = item_id_from_s3_key(s3_key)
-    parts = item_id.upper().split('_')
+    parts = item_id.split('_')
     if len(parts) == 3:
-        tileid, _, product = parts
-        bbox = bounding_box_from_tile_id(tileid)
+        tile, _, product = parts
+        bbox = bounding_box_from_tile(tile)
         metadata = ItemMetadata(
             id=item_id,
             bbox=bbox,
-            tileid=tileid,
+            tile=tile,
             product=product,
         )
     else:
-        tileid, season, polarization, product = parts
-        bbox = bounding_box_from_tile_id(tileid)
+        tile, season, polarization, product = parts
+        bbox = bounding_box_from_tile(tile)
         metadata = ItemMetadata(
             id=item_id,
             bbox=bbox,
-            tileid=tileid,
+            tile=tile,
             product=product,
             extra=ExtraItemMetadata(
                 season=season,
                 date_range=SEASON_DATE_RANGES[season],
                 datetime=SEASON_DATETIME_AVERAGES[season],
-                polarization=polarization,
+                polarization=polarization.upper(),
             ),
         )
     return metadata
@@ -153,15 +149,15 @@ def item_id_from_s3_key(s3_key: str) -> str:
     return basename.split('.')[0]
 
 
-def bounding_box_from_tile_id(tileid: str) -> geometry.Polygon:
+def bounding_box_from_tile(tile: str) -> geometry.Polygon:
     # "Tiles in the data set are labeled by the upper left coordinate of each 1x1 degree tile"
     # http://sentinel-1-global-coherence-earthbigdata.s3-website-us-west-2.amazonaws.com/#organization
 
-    lat = tileid[0]
-    latval = int(tileid[1:3])
+    lat = tile[0]
+    latval = int(tile[1:3])
 
-    lon = tileid[3]
-    lonval = int(tileid[4:7])
+    lon = tile[3]
+    lonval = int(tile[4:7])
 
     max_y = latval if lat == 'N' else -latval
     min_y = max_y - 1

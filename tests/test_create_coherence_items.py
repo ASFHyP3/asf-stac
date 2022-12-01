@@ -7,20 +7,20 @@ from create_coherence_items import SEASON_DATE_RANGES, SEASON_DATETIME_AVERAGES
 
 
 def test_season_datetime_averages():
-    assert SEASON_DATETIME_AVERAGES['WINTER'] - SEASON_DATE_RANGES['WINTER'][0] \
-        == SEASON_DATE_RANGES['WINTER'][1] - SEASON_DATETIME_AVERAGES['WINTER'] \
+    assert SEASON_DATETIME_AVERAGES['winter'] - SEASON_DATE_RANGES['winter'][0] \
+        == SEASON_DATE_RANGES['winter'][1] - SEASON_DATETIME_AVERAGES['winter'] \
         == timedelta(days=44, seconds=43200)
 
-    assert SEASON_DATETIME_AVERAGES['SPRING'] - SEASON_DATE_RANGES['SPRING'][0] \
-           == SEASON_DATE_RANGES['SPRING'][1] - SEASON_DATETIME_AVERAGES['SPRING'] \
+    assert SEASON_DATETIME_AVERAGES['spring'] - SEASON_DATE_RANGES['spring'][0] \
+           == SEASON_DATE_RANGES['spring'][1] - SEASON_DATETIME_AVERAGES['spring'] \
            == timedelta(days=45, seconds=43200)
 
-    assert SEASON_DATETIME_AVERAGES['SUMMER'] - SEASON_DATE_RANGES['SUMMER'][0] \
-           == SEASON_DATE_RANGES['SUMMER'][1] - SEASON_DATETIME_AVERAGES['SUMMER'] \
+    assert SEASON_DATETIME_AVERAGES['summer'] - SEASON_DATE_RANGES['summer'][0] \
+           == SEASON_DATE_RANGES['summer'][1] - SEASON_DATETIME_AVERAGES['summer'] \
            == timedelta(days=45, seconds=43200)
 
-    assert SEASON_DATETIME_AVERAGES['FALL'] - SEASON_DATE_RANGES['FALL'][0] \
-           == SEASON_DATE_RANGES['FALL'][1] - SEASON_DATETIME_AVERAGES['FALL'] \
+    assert SEASON_DATETIME_AVERAGES['fall'] - SEASON_DATE_RANGES['fall'][0] \
+           == SEASON_DATE_RANGES['fall'][1] - SEASON_DATETIME_AVERAGES['fall'] \
            == timedelta(days=45)
 
 
@@ -31,14 +31,10 @@ def test_create_stac_item_N00E005_124D_inc():
                'stac_version': '1.0.0',
                'id': 'N00E005_124D_inc',
                'properties': {
-                   'tileid': 'N00E005',
+                   'tile': 'N00E005',
                    'sar:instrument_mode': create_coherence_items.SAR_INSTRUMENT_MODE,
                    'sar:frequency_band': create_coherence_items.SAR_FREQUENCY_BAND,
-                   'sar:product_type': 'INC',
-                   'sar:center_frequency': create_coherence_items.SAR_CENTER_FREQUENCY,
-                   'sar:looks_range': create_coherence_items.SAR_LOOKS_RANGE,
-                   'sar:looks_azimuth': create_coherence_items.SAR_LOOKS_AZIMUTH,
-                   'sar:observation_direction': create_coherence_items.SAR_OBSERVATION_DIRECTION,
+                   'sar:product_type': 'inc',
                    'start_datetime': '2019-12-01T00:00:00Z',
                    'end_datetime': '2020-11-30T00:00:00Z',
                },
@@ -55,7 +51,7 @@ def test_create_stac_item_N00E005_124D_inc():
                    ),
                },
                'assets': {
-                   'DATA': {
+                   'data': {
                        'href': 'foo.com/data/tiles/N00E005/N00E005_124D_inc.tif',
                        'type': 'image/tiff; application=geotiff',
                    },
@@ -112,18 +108,18 @@ def test_parse_s3_key():
         == create_coherence_items.ItemMetadata(
             id='N00E005_124D_inc',
             bbox=geometry.box(5, -1, 6, 0),
-            tileid='N00E005',
-            product='INC',
+            tile='N00E005',
+            product='inc',
         )
 
     assert create_coherence_items.parse_s3_key('data/tiles/N00E005/N00E005_fall_vh_AMP.tif') \
         == create_coherence_items.ItemMetadata(
             id='N00E005_fall_vh_AMP',
             bbox=geometry.box(5, -1, 6, 0),
-            tileid='N00E005',
+            tile='N00E005',
             product='AMP',
             extra=create_coherence_items.ExtraItemMetadata(
-                season='FALL',
+                season='fall',
                 date_range=(datetime(2020, 9, 1), datetime(2020, 11, 30)),
                 datetime=datetime(2020, 10, 16, 0),
                 polarization='VH',
@@ -134,10 +130,10 @@ def test_parse_s3_key():
         == create_coherence_items.ItemMetadata(
             id='N00E011_winter_vv_COH36',
             bbox=geometry.box(11, -1, 12, 0),
-            tileid='N00E011',
+            tile='N00E011',
             product='COH36',
             extra=create_coherence_items.ExtraItemMetadata(
-                season='WINTER',
+                season='winter',
                 date_range=(datetime(2019, 12, 1), datetime(2020, 2, 28)),
                 datetime=datetime(2020, 1, 14, 12),
                 polarization='VV',
@@ -149,15 +145,15 @@ def test_item_id_from_s3_key():
     assert create_coherence_items.item_id_from_s3_key('path/to/key.tif') == 'key'
 
 
-def test_bounding_box_from_tile_id():
-    assert create_coherence_items.bounding_box_from_tile_id('N49E009') \
+def test_bounding_box_from_tile():
+    assert create_coherence_items.bounding_box_from_tile('N49E009') \
            == geometry.box(9, 48, 10, 49)
 
-    assert create_coherence_items.bounding_box_from_tile_id('N48W090') \
+    assert create_coherence_items.bounding_box_from_tile('N48W090') \
         == geometry.box(-90, 47, -89, 48)
 
-    assert create_coherence_items.bounding_box_from_tile_id('S01E012') \
+    assert create_coherence_items.bounding_box_from_tile('S01E012') \
         == geometry.box(12, -2, 13, -1)
 
-    assert create_coherence_items.bounding_box_from_tile_id('S78W161') \
+    assert create_coherence_items.bounding_box_from_tile('S78W161') \
         == geometry.box(-161, -79, -160, -78)
