@@ -4,7 +4,7 @@ import os
 import urllib.parse
 from dataclasses import dataclass
 
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 import boto3
@@ -12,26 +12,27 @@ from shapely import geometry
 
 s3 = boto3.client('s3')
 
+# TODO verify UTC
 SEASONS = {
     'winter': {
-        'start_datetime': datetime(2019, 12, 1),
-        'end_datetime': datetime(2020, 2, 28),
-        'datetime': datetime(2020, 1, 14, 12),
+        'start_datetime': datetime(2019, 12, 1, tzinfo=timezone.utc),
+        'end_datetime': datetime(2020, 2, 28, tzinfo=timezone.utc),
+        'datetime': datetime(2020, 1, 14, 12, tzinfo=timezone.utc),
     },
     'spring': {
-        'start_datetime': datetime(2020, 3, 1),
-        'end_datetime': datetime(2020, 5, 31),
-        'datetime': datetime(2020, 4, 15, 12),
+        'start_datetime': datetime(2020, 3, 1, tzinfo=timezone.utc),
+        'end_datetime': datetime(2020, 5, 31, tzinfo=timezone.utc),
+        'datetime': datetime(2020, 4, 15, 12, tzinfo=timezone.utc),
     },
     'summer': {
-        'start_datetime': datetime(2020, 6, 1),
-        'end_datetime': datetime(2020, 8, 31),
-        'datetime': datetime(2020, 7, 16, 12),
+        'start_datetime': datetime(2020, 6, 1, tzinfo=timezone.utc),
+        'end_datetime': datetime(2020, 8, 31, tzinfo=timezone.utc),
+        'datetime': datetime(2020, 7, 16, 12, tzinfo=timezone.utc),
     },
     'fall': {
-        'start_datetime': datetime(2020, 9, 1),
-        'end_datetime': datetime(2020, 11, 30),
-        'datetime': datetime(2020, 10, 16, 0),
+        'start_datetime': datetime(2020, 9, 1, tzinfo=timezone.utc),
+        'end_datetime': datetime(2020, 11, 30, tzinfo=timezone.utc),
+        'datetime': datetime(2020, 10, 16, 0, tzinfo=timezone.utc),
     },
 }
 
@@ -79,9 +80,8 @@ def write_stac_items(s3_keys: list[str], s3_url: str) -> None:
 def jsonify_stac_item(stac_item: dict) -> str:
     class DateTimeEncoder(json.JSONEncoder):
         def default(self, obj):
-            if isinstance(obj, datetime):
-                # TODO can we assume utc?
-                return obj.isoformat() + 'Z'
+            if isinstance(obj, datetime) and obj.tzinfo == timezone.utc:
+                return obj.isoformat().removesuffix('+00:00') + 'Z'
             return json.JSONEncoder.default(self, obj)
 
     return json.dumps(stac_item, cls=DateTimeEncoder)

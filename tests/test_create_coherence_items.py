@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from shapely import geometry
 
@@ -35,7 +35,7 @@ def test_jsonify_stac_item():
             'dict_field': {'str_field': 'bar'},
             'list_field': [[1, 2], [3, 4]],
             'tuple_field': ((1, 2), (3, 4)),
-            'datetime_field': datetime(2022, 11, 30, 12),
+            'datetime_field': datetime(2022, 11, 30, 12, tzinfo=timezone.utc),
         }
     ) == (
         '{"str_field": "foo", "int_field": 5, "float_field": 3.1, "bool_field": true, "null_field": null, '
@@ -55,8 +55,8 @@ def test_create_stac_item_N00E005_124D_inc():
                    'sar:instrument_mode': create_coherence_items.SAR_INSTRUMENT_MODE,
                    'sar:frequency_band': create_coherence_items.SAR_FREQUENCY_BAND,
                    'sar:product_type': 'inc',
-                   'start_datetime': datetime(2019, 12, 1),
-                   'end_datetime': datetime(2020, 11, 30),
+                   'start_datetime': datetime(2019, 12, 1, tzinfo=timezone.utc),
+                   'end_datetime': datetime(2020, 11, 30, tzinfo=timezone.utc),
                },
                'geometry': {
                    'type': 'Polygon',
@@ -94,9 +94,9 @@ def test_create_stac_item_S78W078_summer_hh_AMP():
                    'sar:frequency_band': create_coherence_items.SAR_FREQUENCY_BAND,
                    'sar:polarizations': ['HH'],
                    'sar:product_type': 'AMP',
-                   'start_datetime': datetime(2020, 6, 1),
-                   'end_datetime': datetime(2020, 8, 31),
-                   'datetime': datetime(2020, 7, 16, 12),
+                   'start_datetime': datetime(2020, 6, 1, tzinfo=timezone.utc),
+                   'end_datetime': datetime(2020, 8, 31, tzinfo=timezone.utc),
+                   'datetime': datetime(2020, 7, 16, 12, tzinfo=timezone.utc),
                    'season': 'summer',
                },
                'geometry': {
@@ -140,9 +140,9 @@ def test_parse_s3_key():
             product='AMP',
             extra=create_coherence_items.ExtraItemMetadata(
                 season='fall',
-                start_datetime=datetime(2020, 9, 1),
-                end_datetime=datetime(2020, 11, 30),
-                datetime=datetime(2020, 10, 16, 0),
+                start_datetime=datetime(2020, 9, 1, tzinfo=timezone.utc),
+                end_datetime=datetime(2020, 11, 30, tzinfo=timezone.utc),
+                datetime=datetime(2020, 10, 16, 0, tzinfo=timezone.utc),
                 polarization='VH',
             ),
         )
@@ -155,9 +155,9 @@ def test_parse_s3_key():
             product='COH36',
             extra=create_coherence_items.ExtraItemMetadata(
                 season='winter',
-                start_datetime=datetime(2019, 12, 1),
-                end_datetime=datetime(2020, 2, 28),
-                datetime=datetime(2020, 1, 14, 12),
+                start_datetime=datetime(2019, 12, 1, tzinfo=timezone.utc),
+                end_datetime=datetime(2020, 2, 28, tzinfo=timezone.utc),
+                datetime=datetime(2020, 1, 14, 12, tzinfo=timezone.utc),
                 polarization='VV',
             ),
         )
