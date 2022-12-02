@@ -29,39 +29,10 @@ with the client security group attached. See the ingress rules for the database 
 The database host and database user credentials are available via the AWS Secrets Manager console
 in the AWS account where the CloudFormation stack was deployed.
 
-## Manually connecting to the database
-
-We shouldn't need to manually connect to the database during normal operations,
-as the API will connect automatically, but we can if we need to (e.g. for debugging purposes).
-
-Confirm that you have [PostgreSQL](https://www.postgresql.org/download/) installed, then run:
-
-```
-make psql db_host=<host> db_user=<user> db_password=<password>
-```
-
-## Running the API locally
-
-You can run the STAC API frontend locally and it will automatically connect to the AWS-hosted database.
-
-The local API provides access to the Transaction extension (which provides create/update/delete endpoints),
-while the publicly available API does not. Therefore, if you need access to the Transaction endpoints for
-any reason, you must run the API locally:
-
-```
-make run-api db_host=<host> db_admin_password=<password>
-```
-
-You should see something like `Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)` in the output; you can
-query the API at that URL.
-
-You can confirm that the Transaction extension is enabled by opening the local API URL in a web browser
-and appending `/api.html` to open the Swagger UI. You should see various create/update/delete endpoints
-under the "Transaction Extension" heading. You should be able to successfully query these endpoints via
-the local API, but not via the publicly available API. (TODO: after removing those endpoints completely
-from the public API, update this paragraph to reflect that they will no longer appear in the Swagger UI.)
-
 ## Creating and ingesting the coherence dataset
+
+We must create and ingest the coherence dataset after running a new STAC API deployment. We must also
+re-create and re-ingest the dataset after making changes to how the STAC items are structured.
 
 Fetch the list of S3 objects:
 
@@ -81,6 +52,43 @@ The creation script should write the entire dataset to a `.ndjson` file. Finally
 ```
 make pypgstac-load db_host=<host> db_admin_password=<password> ndjson_file=<path>
 ```
+
+## Manually connecting to the database
+
+We shouldn't need to manually connect to the database during normal operations, but we can if we need to
+(e.g. for debugging purposes).
+
+Confirm that you have [PostgreSQL](https://www.postgresql.org/download/) installed, then run:
+
+```
+make psql db_host=<host> db_user=<user> db_password=<password>
+```
+
+## Running the API locally
+
+You can run the STAC API frontend locally and it will automatically connect to the AWS-hosted database.
+
+We shouldn't need to run the API locally during normal operations, but we can if we need to
+(e.g. for debugging purposes).
+
+The local API provides access to the Transaction extension (which provides create/update/delete endpoints),
+while the publicly available API does not. We shouldn't need access to the Transaction endpoints during
+normal operations, but they may be useful for making one-off edits in a sandbox or test deployment.
+
+Run:
+
+```
+make run-api db_host=<host> db_admin_password=<password>
+```
+
+You should see something like `Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)` in the output; you can
+query the API at that URL.
+
+You can confirm that the Transaction extension is enabled by opening the local API URL in a web browser
+and appending `/api.html` to open the Swagger UI. You should see various create/update/delete endpoints
+under the "Transaction Extension" heading. You should be able to successfully query these endpoints via
+the local API, but not via the publicly available API. (TODO: after removing those endpoints completely
+from the public API, update this paragraph to reflect that they will no longer appear in the Swagger UI.)
 
 ## Upgrading the database
 
