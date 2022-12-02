@@ -1,2 +1,4 @@
 #!/usr/bin/env bash
-aws s3 ls --recursive s3://sentinel-1-global-coherence-earthbigdata/data/tiles/ | cut -c '32-' | grep '.tif$' > coherence-s3-objects.txt
+
+# TODO: remove the grep -v option after the duplicate objects issue is resolved: https://github.com/ASFHyP3/asf-stac/issues/116
+aws s3 ls --recursive s3://sentinel-1-global-coherence-earthbigdata/data/tiles/ | cut -c '32-' | grep -v /N71E028/ '.tif$' > coherence-s3-objects.txt
