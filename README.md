@@ -67,7 +67,6 @@ make psql db_host=<host> db_user=<user> db_password=<password>
 ## Running the API locally
 
 You can run the STAC API frontend locally and it will automatically connect to the AWS-hosted database.
-
 We shouldn't need to run the API locally during normal operations, but we can if we need to
 (e.g. for debugging purposes).
 
