@@ -41,8 +41,10 @@ Resources:
   DatabaseInstance:
     Type: AWS::RDS::DBInstance
     Properties:
-      AllocatedStorage: '20' # TODO depends on StorageType?
-      DBInstanceClass: db.t3.micro # TODO different class for prod?
+      StorageType: io1
+      AllocatedStorage: '100'
+      Iops: 1000
+      DBInstanceClass: db.m6g.large
       DBSubnetGroupName: !Ref DatabaseSubnetGroup
       VPCSecurityGroups:
         - !Ref DatabaseSecurityGroup
@@ -50,11 +52,8 @@ Resources:
       EngineVersion: '14.4'
       MasterUsername: postgres
       MasterUserPassword: !Ref DatabaseAdminPassword
-      # TODO: MaxAllocatedStorage: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-rds-dbinstance.html#cfn-rds-dbinstance-maxallocatedstorage
       Port: '5432'
-      # TODO: ProcessorFeatures: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-rds-dbinstance.html#cfn-rds-dbinstance-processorfeatures
       PubliclyAccessible: true
-      # TODO: StorageType: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-rds-dbinstance.html#cfn-rds-dbinstance-storagetype
 
   DatabaseSubnetGroup:
     Type: AWS::RDS::DBSubnetGroup
