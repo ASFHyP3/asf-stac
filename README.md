@@ -39,18 +39,25 @@ Fetch the list of S3 objects:
 ```
 cd collections/sentinel-1-global-coherence/
 ./list-coherence-objects
+wc -l coherence-s3-objects.txt
 ```
 
-The list should be written to `coherence-s3-objects.txt`. Next, for help using the creation script, run:
+Confirm that the number of lines is `1033388` (one per object).
+
+Next, create the dataset:
 
 ```
-python create_coherence_items.py -h
+python create_coherence_items.py coherence-s3-objects.txt
+wc -l sentinel-1-global-coherence.ndjson
 ```
 
-The creation script should write the entire dataset to a `.ndjson` file. Finally, to ingest the dataset, run:
+Again, confirm that the number of lines is the same as in the previous step.
+
+Finally, ingest the dataset:
 
 ```
-make pypgstac-load db_host=<host> db_admin_password=<password> table=items ndjson_file=<path>
+cd ../../
+make pypgstac-load db_host=<host> db_admin_password=<password> table=items ndjson_file=sentinel-1-global-coherence.ndjson
 ```
 
 ## Manually connecting to the database
