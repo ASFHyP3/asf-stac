@@ -31,7 +31,7 @@
   },
   "summaries": {
     "season": ["spring", "summer", "fall", "winter"],
-    "sar:polarizations": ["VV", "VH", "HH", "HV"],
+    "sar:polarizations": [["VV"], ["VH"], ["HH"], ["HV"]],
     "sar:product_type": ["COH06", "COH12", "COH18", "COH24", "COH36", "COH48", "AMP", "rho", "rmse", "tau", "inc", "lsmap"]
   },
   "stac_extensions": [],
