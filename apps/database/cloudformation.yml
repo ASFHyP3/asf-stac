@@ -41,10 +41,9 @@ Resources:
   DatabaseInstance:
     Type: AWS::RDS::DBInstance
     Properties:
-      StorageType: io1
-      AllocatedStorage: '100'
-      Iops: 1000
-      DBInstanceClass: db.m6g.large
+      StorageType: gp3
+      AllocatedStorage: '50'
+      DBInstanceClass: db.t4g.medium
       DBSubnetGroupName: !Ref DatabaseSubnetGroup
       VPCSecurityGroups:
         - !Ref DatabaseSecurityGroup
