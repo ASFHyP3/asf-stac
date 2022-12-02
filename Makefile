@@ -47,7 +47,7 @@ configure-database-roles:
 
 pypgstac-load:
 	PGHOST=${db_host} PGPORT=5432 PGDATABASE=postgres PGUSER=postgres PGPASSWORD=${db_admin_password} \
-	    pypgstac load ${type} ${ndjson_file} --method upsert
+	    pypgstac load ${table} ${ndjson_file} --method upsert
 
 run-api:
 	POSTGRES_HOST_READER=${db_host} POSTGRES_HOST_WRITER=${db_host} POSTGRES_PORT=5432 \

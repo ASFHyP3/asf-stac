@@ -50,7 +50,7 @@ python create_coherence_items.py -h
 The creation script should write the entire dataset to a `.ndjson` file. Finally, to ingest the dataset, run:
 
 ```
-make pypgstac-load db_host=<host> db_admin_password=<password> ndjson_file=<path>
+make pypgstac-load db_host=<host> db_admin_password=<password> table=items ndjson_file=<path>
 ```
 
 ## Manually connecting to the database
