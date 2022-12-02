@@ -47,7 +47,8 @@ The list should be written to `coherence-s3-objects.txt`. Next, for help using t
 python create_coherence_items.py -h
 ```
 
-The creation script should write the entire dataset to a `.ndjson` file. Finally, to ingest the dataset, run:
+The creation script should write the entire dataset to a `.ndjson` file. Finally, to ingest the dataset,
+`cd` back to the project root and run:
 
 ```
 make pypgstac-load db_host=<host> db_admin_password=<password> table=items ndjson_file=<path>
