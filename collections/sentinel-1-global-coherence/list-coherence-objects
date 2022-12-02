@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
 # TODO: remove the grep -v command after the duplicate objects issue is resolved: https://github.com/ASFHyP3/asf-stac/issues/116
-aws s3 ls --recursive s3://sentinel-1-global-coherence-earthbigdata/data/tiles/ | cut -c '32-' | grep -v /N71E028/ | grep '.tif$' > coherence-s3-objects.txt
+aws s3 ls --no-sign-request --recursive s3://sentinel-1-global-coherence-earthbigdata/data/tiles/ | cut -c '32-' | grep -v /N71E028/ | grep '.tif$' > coherence-s3-objects.txt
