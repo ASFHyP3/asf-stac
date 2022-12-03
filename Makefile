@@ -45,10 +45,17 @@ configure-database-roles:
 	    --set=db_read_password=${db_read_password} \
 	    -f configure-database-roles.sql
 
+pypgstac-load:
+	PGHOST=${db_host} PGPORT=5432 PGDATABASE=postgres PGUSER=postgres PGPASSWORD=${db_admin_password} \
+	    pypgstac load ${table} ${ndjson_file} --method upsert
+
 run-api:
 	POSTGRES_HOST_READER=${db_host} POSTGRES_HOST_WRITER=${db_host} POSTGRES_PORT=5432 \
 	    POSTGRES_DBNAME=postgres POSTGRES_USER=postgres POSTGRES_PASS=${db_admin_password} \
 	    python -m stac_fastapi.pgstac.app
+
+test:
+	PYTHONPATH=${PWD}/collections/sentinel-1-global-coherence/ python -m pytest tests/
 
 static: flake8 cfn-lint
 

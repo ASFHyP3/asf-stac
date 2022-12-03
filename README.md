@@ -2,10 +2,11 @@
 
 Creation and hosting of STAC catalogs by the ASF Tools team.
 
-The test API is available at <https://stac-test.asf.alaska.edu>
-and the Swagger UI is available at <https://stac-test.asf.alaska.edu/api.html>.
+**Production API:** <https://stac.asf.alaska.edu>
+* *Swagger UI:* <https://stac.asf.alaska.edu/api.html>
 
-TODO: document prod URL
+**Test API:** <https://stac-test.asf.alaska.edu>
+* *Swagger UI:* <https://stac-test.asf.alaska.edu/api.html>
 
 ## Developer setup
 
@@ -15,15 +16,11 @@ Clone the repository, create the environment, and install the developer dependen
 git clone git@github.com:ASFHyP3/asf-stac.git
 cd asf-stac
 
-conda create -c conda-forge -n asf-stac python=3.9 postgresql
+conda env create -f environment.yml
 conda activate asf-stac
-
-make install
 ```
 
 ## Requirements for connecting to the database
-
-Refer to this section when manually connecting to the database or when running the API locally.
 
 The database only accepts connections from within the ASF Full VPN or from clients
 with the client security group attached. See the ingress rules for the database security group in the
@@ -32,10 +29,41 @@ with the client security group attached. See the ingress rules for the database 
 The database host and database user credentials are available via the AWS Secrets Manager console
 in the AWS account where the CloudFormation stack was deployed.
 
+## Creating and ingesting the coherence dataset
+
+We must create and ingest the coherence dataset after running a new STAC API deployment. We must also
+re-create and re-ingest the dataset after making changes to how the STAC items are structured.
+
+Fetch the list of S3 objects:
+
+```
+cd collections/sentinel-1-global-coherence/
+./list-coherence-objects
+wc -l coherence-s3-objects.txt
+```
+
+Confirm that the number of lines is `1033388` (one per object).
+
+Next, create the dataset:
+
+```
+python create_coherence_items.py coherence-s3-objects.txt
+wc -l sentinel-1-global-coherence.ndjson
+```
+
+Again, confirm that the number of lines is the same as in the previous step.
+
+Finally, ingest the dataset:
+
+```
+cd ../../
+make pypgstac-load db_host=<host> db_admin_password=<password> table=items ndjson_file=sentinel-1-global-coherence.ndjson
+```
+
 ## Manually connecting to the database
 
-We shouldn't need to manually connect to the database during normal operations,
-as the API will connect automatically, but we can if we need to (e.g. for debugging purposes).
+We shouldn't need to manually connect to the database during normal operations, but we can if we need to
+(e.g. for debugging purposes).
 
 Confirm that you have [PostgreSQL](https://www.postgresql.org/download/) installed, then run:
 
@@ -46,10 +74,14 @@ make psql db_host=<host> db_user=<user> db_password=<password>
 ## Running the API locally
 
 You can run the STAC API frontend locally and it will automatically connect to the AWS-hosted database.
+We shouldn't need to run the API locally during normal operations, but we can if we need to
+(e.g. for debugging purposes).
 
 The local API provides access to the Transaction extension (which provides create/update/delete endpoints),
-while the publicly available API does not. Therefore, if you need access to the Transaction endpoints, you
-must run the API locally:
+while the publicly available API does not. We shouldn't need access to the Transaction endpoints during
+normal operations, but they may be useful for making one-off edits in a sandbox or test deployment.
+
+Run:
 
 ```
 make run-api db_host=<host> db_admin_password=<password>
@@ -63,11 +95,6 @@ and appending `/api.html` to open the Swagger UI. You should see various create/
 under the "Transaction Extension" heading. You should be able to successfully query these endpoints via
 the local API, but not via the publicly available API. (TODO: after removing those endpoints completely
 from the public API, update this paragraph to reflect that they will no longer appear in the Swagger UI.)
-
-## Ingesting a STAC dataset
-
-Run `python ingest_data.py -h` for usage instructions. You must run the ingest script against
-a locally running API, as the script requires access to the Transaction endpoints.
 
 ## Upgrading the database
 

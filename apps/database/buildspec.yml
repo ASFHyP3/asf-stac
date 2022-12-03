@@ -12,3 +12,5 @@ phases:
   build:
     commands:
       - make configure-database db_host=$PGHOST db_admin_password=$PGPASSWORD db_read_password=$READ_PASSWORD
+      - python convert_collection_to_ndjson.py collections/sentinel-1-global-coherence/sentinel-1-global-coherence.json
+      - make pypgstac-load db_host=$PGHOST db_admin_password=$PGPASSWORD table=collections ndjson_file=collections/sentinel-1-global-coherence/sentinel-1-global-coherence.ndjson
