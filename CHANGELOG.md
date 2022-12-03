@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.2.0]
 ### Added
-- Created a STAC item collection for the entire coherence dataset.
+- Created a STAC item collection for the `sentinel-1-global-coherence` dataset.
 ### Changed
 - Improved API performance by increasing database instance size and storage type.
 
