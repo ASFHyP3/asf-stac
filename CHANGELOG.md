@@ -4,9 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.1.1]
+## [0.2.0]
 ### Added
-- Updated `coherence_stac.py` to create a STAC catalog for the entire coherence dataset
+- Created a STAC item collection for the entire coherence dataset.
+### Changed
+- Improved API performance by increasing database instance size.
 
 ## [0.1.0]
 ### Added
