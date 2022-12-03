@@ -57,7 +57,7 @@ Finally, ingest the dataset:
 
 ```
 cd ../../
-make pypgstac-load db_host=<host> db_admin_password=<password> table=items ndjson_file=sentinel-1-global-coherence.ndjson
+make pypgstac-load db_host=<host> db_admin_password=<password> table=items ndjson_file=collections/sentinel-1-global-coherence/sentinel-1-global-coherence.ndjson
 ```
 
 ## Manually connecting to the database
