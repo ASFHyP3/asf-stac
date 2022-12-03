@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Created a STAC item collection for the entire coherence dataset.
 ### Changed
-- Improved API performance by increasing database instance size.
+- Improved API performance by increasing database instance size and storage type.
 
 ## [0.1.0]
 ### Added
