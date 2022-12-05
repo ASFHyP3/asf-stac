@@ -60,6 +60,23 @@ cd ../../
 make pypgstac-load db_host=<host> db_admin_password=<password> table=items ndjson_file=collections/sentinel-1-global-coherence/sentinel-1-global-coherence.ndjson
 ```
 
+## Creating and ingesting the HAND dataset
+
+We must create and ingest the HAND dataset after running a new STAC API deployment. We must also
+re-create and re-ingest the dataset after making changes to how the STAC items are structured.
+
+Fetch the list of S3 objects:
+
+```
+cd collections/glo-30-hand/
+./list-hand-objects
+wc -l hand-s3-objects.txt
+```
+
+Confirm that the number of lines is `26450` (one per object).
+
+TODO: finish this section
+
 ## Manually connecting to the database
 
 We shouldn't need to manually connect to the database during normal operations, but we can if we need to
