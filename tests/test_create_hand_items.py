@@ -1,6 +1,20 @@
 import create_hand_items
 
 
+def test_gdal_info():
+    assert create_hand_items.gdal_info(
+        'v1/2021/Copernicus_DSM_COG_10_N02_00_W062_00_HAND.tif',
+        'https://glo-30-hand.s3.us-west-2.amazonaws.com/',
+    )['wgs84Extent'] == {
+               'type': 'Polygon',
+               'coordinates': [[[-62.0001389, 3.0001389],
+                                [-62.0001389, 2.0001389],
+                                [-61.0001389, 2.0001389],
+                                [-61.0001389, 3.0001389],
+                                [-62.0001389, 3.0001389]]],
+           }
+
+
 def test_create_stac_item():
     assert create_hand_items.create_stac_item(
         'v1/2021/Copernicus_DSM_COG_10_N00_00_E006_00_HAND.tif',

@@ -29,7 +29,6 @@ def write_stac_items(s3_keys: list[str], s3_url: str, output_file: Path) -> None
             f.write(asf_stac_util.jsonify_stac_item(stac_item) + '\n')
 
 
-# TODO unit test for this function and/or verify the output for one of the tifs?
 def gdal_info(s3_key: str, s3_url: str) -> dict:
     url = f'/vsicurl/{urllib.parse.urljoin(s3_url, s3_key)}'
     return gdal.Info(url, format='json')
