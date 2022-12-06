@@ -43,6 +43,7 @@ def jsonify_stac_item(stac_item: dict) -> str:
     return json.dumps(stac_item, cls=DateTimeEncoder)
 
 
+# TODO unit test for this function and/or verify the output for one of the tifs?
 def gdal_info(s3_key: str, s3_url: str) -> dict:
     url = f'/vsicurl/{urllib.parse.urljoin(s3_url, s3_key)}'
     return gdal.Info(url, format='json')
