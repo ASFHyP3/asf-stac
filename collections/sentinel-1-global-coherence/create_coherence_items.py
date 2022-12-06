@@ -1,11 +1,11 @@
 import argparse
-import json
 import urllib.parse
 from dataclasses import dataclass
 
 from datetime import datetime, timezone
 from pathlib import Path, PurePath
 
+import asf_stac_util
 import boto3
 from shapely import geometry
 
@@ -70,17 +70,7 @@ def write_stac_items(s3_keys: list[str], s3_url: str, output_file: Path) -> None
         for count, s3_key in enumerate(s3_keys, start=1):
             print(f'Creating STAC items: {count}/{len(s3_keys)}', end='\r')
             stac_item = create_stac_item(s3_key, s3_url)
-            f.write(jsonify_stac_item(stac_item) + '\n')
-
-
-def jsonify_stac_item(stac_item: dict) -> str:
-    class DateTimeEncoder(json.JSONEncoder):
-        def default(self, obj):
-            if isinstance(obj, datetime) and obj.tzinfo == timezone.utc:
-                return obj.isoformat().removesuffix('+00:00') + 'Z'
-            return json.JSONEncoder.default(self, obj)
-
-    return json.dumps(stac_item, cls=DateTimeEncoder)
+            f.write(asf_stac_util.jsonify_stac_item(stac_item) + '\n')
 
 
 def create_stac_item(s3_key: str, s3_url: str) -> dict:

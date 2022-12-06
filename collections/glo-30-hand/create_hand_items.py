@@ -1,9 +1,8 @@
 import argparse
-import json
 import urllib.parse
-from datetime import datetime, timezone
 from pathlib import Path, PurePath
 
+import asf_stac_util
 import boto3
 from osgeo import gdal
 from shapely import geometry
@@ -27,20 +26,7 @@ def write_stac_items(s3_keys: list[str], s3_url: str, output_file: Path) -> None
             print(f'Creating STAC items: {count}/{len(s3_keys)}', end='\r')
             gdal_info_output = gdal_info(s3_key, s3_url)
             stac_item = create_stac_item(s3_key, s3_url, gdal_info_output)
-            f.write(jsonify_stac_item(stac_item) + '\n')
-
-
-# TODO this is copied from create_coherence_items.py, so we should move it to its own module and import it
-#  in both creation scripts, to avoid duplicating tests (and move its test from test_create_coherence_items.py to
-#  the test file for the new module)
-def jsonify_stac_item(stac_item: dict) -> str:
-    class DateTimeEncoder(json.JSONEncoder):
-        def default(self, obj):
-            if isinstance(obj, datetime) and obj.tzinfo == timezone.utc:
-                return obj.isoformat().removesuffix('+00:00') + 'Z'
-            return json.JSONEncoder.default(self, obj)
-
-    return json.dumps(stac_item, cls=DateTimeEncoder)
+            f.write(asf_stac_util.jsonify_stac_item(stac_item) + '\n')
 
 
 # TODO unit test for this function and/or verify the output for one of the tifs?
