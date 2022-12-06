@@ -1,0 +1,34 @@
+{
+  "type": "Collection",
+  "id": "glo-30-hand",
+  "title": "Global 30m Height Above Nearest Drainage (HAND)",
+  "stac_version": "1.0.0",
+  "description": "Height Above Nearest Drainage (HAND) is a terrain model that normalizes topography to the relative heights along the drainage network and is used to describe the relative soil gravitational potentials or the local drainage potentials. Each pixel value represents the vertical distance to the nearest drainage. The HAND data provides near-worldwide land coverage at 30 meters and was produced from the 2021 release of the Copernicus GLO-30 Public DEM as distributed in the Registry of Open Data on AWS. To generate the GLO-30 HAND, we used the ASF Tools Python package, which is based on the HydroSAR Big_Hand_notebook.ipynb and uses PySheds, a library for simple and fast watershed delineation in Python. The HAND data are provided as a tiled set of Cloud Optimized GeoTIFFs (COGs) with 30-meter (1 arcsecond) pixel spacing. The COGs are organized into the same 1 degree by 1 degree grid tiles as the GLO-30 DEM, and individual tiles are pixel-aligned to the corresponding COG DEM tile.",
+  "links": [
+    {
+      "rel": "about",
+      "href": "https://glo-30-hand.s3.us-west-2.amazonaws.com/readme.html",
+      "type": "text/html"
+    }
+  ],
+  "extent": {
+    "spatial": {
+      "bbox": [
+        -180.0,
+        -90.0,
+        180.0,
+        90.0
+      ]
+    },
+    "temporal": {
+      "interval": [
+        [
+          null,
+          null
+        ]
+      ]
+    }
+  },
+  "stac_extensions": [],
+  "license": "Creative Commons Attribution 4.0 International Public License."
+}
