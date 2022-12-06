@@ -163,10 +163,6 @@ def test_parse_s3_key():
         )
 
 
-def test_item_id_from_s3_key():
-    assert create_coherence_items.item_id_from_s3_key('path/to/key.tif') == 'key'
-
-
 def test_bounding_box_from_tile():
     assert create_coherence_items.bounding_box_from_tile('N49E009') \
            == geometry.box(9, 48, 10, 49)

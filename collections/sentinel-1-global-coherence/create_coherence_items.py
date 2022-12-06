@@ -122,7 +122,7 @@ def create_stac_item(s3_key: str, s3_url: str) -> dict:
 
 
 def parse_s3_key(s3_key: str) -> ItemMetadata:
-    item_id = item_id_from_s3_key(s3_key)
+    item_id = PurePath(s3_key).stem
     parts = item_id.split('_')
     if len(parts) == 3:
         tile, _, product = parts
@@ -150,10 +150,6 @@ def parse_s3_key(s3_key: str) -> ItemMetadata:
             ),
         )
     return metadata
-
-
-def item_id_from_s3_key(s3_key: str) -> str:
-    return PurePath(s3_key).stem
 
 
 def bounding_box_from_tile(tile: str) -> geometry.Polygon:
