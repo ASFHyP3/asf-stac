@@ -20,6 +20,18 @@ conda env create -f environment.yml
 conda activate asf-stac
 ```
 
+If you ever see the following warning from `gdal`...
+
+```
+Warning 1: PROJ: proj_create_from_database: Open of /home/.../miniconda3/envs/asf-stac/share/proj failed
+```
+
+...you can run the following command and then re-activate your Conda environment:
+
+```
+conda env config vars set PROJ_LIB=${CONDA_PREFIX}/share/proj
+```
+
 ## Requirements for connecting to the database
 
 The database only accepts connections from within the ASF Full VPN or from clients
@@ -46,6 +58,7 @@ Confirm that the number of lines is `1033388` (one per object).
 
 Next, create the dataset:
 
+TODO: why don't we have to set `AWS_PROFILE` for this command? (for getting the bucket region)
 ```
 python create_coherence_items.py coherence-s3-objects.txt
 wc -l sentinel-1-global-coherence.ndjson
@@ -75,7 +88,21 @@ wc -l hand-s3-objects.txt
 
 Confirm that the number of lines is `26450` (one per object).
 
-TODO: finish this section
+Next, create the dataset:
+
+```
+AWS_PROFILE=opendata python create_hand_items.py hand-s3-objects.txt
+wc -l glo-30-hand.ndjson
+```
+
+Again, confirm that the number of lines is the same as in the previous step.
+
+Finally, ingest the dataset:
+
+```
+cd ../../
+make pypgstac-load db_host=<host> db_admin_password=<password> table=items ndjson_file=collections/glo-30-hand/glo-30-hand.ndjson
+```
 
 ## Manually connecting to the database
 
