@@ -33,6 +33,8 @@ def test_create_stac_item():
            'id': 'Copernicus_DSM_COG_10_N00_00_E006_00_HAND',
            'properties': {
                'datetime': None,
+               'start_datetime': '2010-12-01T00:00:00Z',
+               'end_datetime': '2015-02-01T00:00:00Z',
            },
            'geometry': {
                'type': 'Polygon',

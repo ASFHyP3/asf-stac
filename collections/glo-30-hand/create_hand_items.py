@@ -43,6 +43,8 @@ def create_stac_item(s3_key: str, s3_url: str, gdal_info_output: dict) -> dict:
         'id': item_id,
         'properties': {
             'datetime': None,
+            'start_datetime': '2010-12-01T00:00:00Z',
+            'end_datetime': '2015-02-01T00:00:00Z',
         },
         'geometry': item_geometry,
         'assets': {
