@@ -55,7 +55,7 @@ run-api:
 	    python -m stac_fastapi.pgstac.app
 
 test:
-	PYTHONPATH=${PWD}/collections/sentinel-1-global-coherence/ python -m pytest tests/
+	PYTHONPATH=${PWD}/collections/sentinel-1-global-coherence/:${PWD}/collections/glo-30-hand/ python -m pytest tests/
 
 static: flake8 cfn-lint
 
