@@ -1,5 +1,6 @@
 import argparse
 import urllib.parse
+from datetime import datetime, timezone
 from pathlib import Path, PurePath
 
 import asf_stac_util
@@ -43,6 +44,8 @@ def create_stac_item(s3_key: str, s3_url: str, gdal_info_output: dict) -> dict:
         'id': item_id,
         'properties': {
             'datetime': None,
+            'start_datetime': datetime(2010, 12, 1, tzinfo=timezone.utc),
+            'end_datetime': datetime(2015, 2, 1, tzinfo=timezone.utc),
         },
         'geometry': item_geometry,
         'assets': {
