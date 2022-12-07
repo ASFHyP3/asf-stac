@@ -58,7 +58,6 @@ Confirm that the number of lines is `1033388` (one per object).
 
 Next, create the dataset:
 
-TODO: why don't we have to set `AWS_PROFILE` for this command? (for getting the bucket region)
 ```
 python create_coherence_items.py coherence-s3-objects.txt
 wc -l sentinel-1-global-coherence.ndjson
@@ -91,7 +90,7 @@ Confirm that the number of lines is `26450` (one per object).
 Next, create the dataset:
 
 ```
-AWS_PROFILE=opendata python create_hand_items.py hand-s3-objects.txt
+python create_hand_items.py hand-s3-objects.txt
 wc -l glo-30-hand.ndjson
 ```
 
