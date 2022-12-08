@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+aws s3 ls --no-sign-request --recursive s3://glo-30-hand/v1/2021/ | cut -c '32-' | grep '.tif$' > hand-s3-objects.txt
