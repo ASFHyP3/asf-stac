@@ -52,6 +52,7 @@ pypgstac-load:
 run-api:
 	POSTGRES_HOST_READER=${db_host} POSTGRES_HOST_WRITER=${db_host} POSTGRES_PORT=5432 \
 	    POSTGRES_DBNAME=postgres POSTGRES_USER=postgres POSTGRES_PASS=${db_admin_password} \
+	    ENABLED_EXTENSIONS=${enabled_extensions} \
 	    python -m stac_fastapi.pgstac.app
 
 test:

@@ -132,14 +132,18 @@ Run:
 make run-api db_host=<host> db_admin_password=<password>
 ```
 
+You can also append an `enabled_extensions=<list>` argument, where `<list>` is the list of extensions
+that gets passed to the `pgstac` app via the `ENABLED_EXTENSIONS` environment variable, as described
+in the docstring for the
+[module](https://github.com/stac-utils/stac-fastapi/blob/master/stac_fastapi/pgstac/stac_fastapi/pgstac/app.py).
+
 You should see something like `Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)` in the output; you can
 query the API at that URL.
 
 You can confirm that the Transaction extension is enabled by opening the local API URL in a web browser
 and appending `/api.html` to open the Swagger UI. You should see various create/update/delete endpoints
-under the "Transaction Extension" heading. You should be able to successfully query these endpoints via
-the local API, but not via the publicly available API. (TODO: after removing those endpoints completely
-from the public API, update this paragraph to reflect that they will no longer appear in the Swagger UI.)
+under the "Transaction Extension" heading. These endpoints should not appear in the Swagger UI for the
+publicly available API.
 
 ## Upgrading the database
 
