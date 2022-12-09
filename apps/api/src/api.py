@@ -6,7 +6,6 @@ os.environ['ENABLED_EXTENSIONS'] = ','.join([
     'fields',
     'pagination',
     'context',
-    'filter',
 ])
 
 from stac_fastapi.pgstac.app import handler  # noqa: F401, E402
