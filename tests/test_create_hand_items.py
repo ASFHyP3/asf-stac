@@ -57,8 +57,8 @@ def test_create_stac_item():
            'collection': create_hand_items.COLLECTION_ID,
             'links': [
                 {
-                    'href': 'foo.com/Copernicus_DSM_COG_10_N00_00_E006_00_DEM/'
-                            'Copernicus_DSM_COG_10_N00_00_E006_00_DEM.tif',
+                    'href': 'https://copernicus-dem-30m.s3.eu-central-1.amazonaws.com/'
+                            'Copernicus_DSM_COG_10_N00_00_E006_00_DEM/Copernicus_DSM_COG_10_N00_00_E006_00_DEM.tif',
                     'type': 'image/tiff; application=geotiff',
                     'title': 'GLO-30 Public Copernicus Digital Elevation Model GeoTIFF '
                              'used as input to create this HAND GeoTIFF',
