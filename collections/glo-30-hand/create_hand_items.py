@@ -26,14 +26,14 @@ def write_stac_items(s3_keys: list[str], s3_url: str, output_file: Path) -> None
         for count, s3_key in enumerate(s3_keys, start=1):
             print(f'Creating STAC items: {count}/{len(s3_keys)}', end='\r')
             gdal_info_output = gdal_info(s3_key, s3_url)
-
-            # get the dem_s3_url for DEM file
-            dem_file = str(PurePath(s3_key).name).replace("HAND", "DEM")
-            dem_prefix = PurePath(dem_file).stem
-            dem_s3_url = f"https://copernicus-dem-30m.s3.eu-central-1.amazonaws.com/{dem_prefix}/{dem_file}"
-
-            stac_item = create_stac_item(s3_key, s3_url, gdal_info_output, dem_s3_url)
+            stac_item = create_stac_item(s3_key, s3_url, gdal_info_output)
             f.write(asf_stac_util.jsonify_stac_item(stac_item) + '\n')
+
+
+def get_dem_s3_url(s3_key: str) -> str:
+    # get the dem_s3_url for DEM file
+    dem_prefix = PurePath(s3_key).stem.replace("HAND", "DEM")
+    return f"https://copernicus-dem-30m.s3.eu-central-1.amazonaws.com/{dem_prefix}/{dem_prefix}.tif"
 
 
 def gdal_info(s3_key: str, s3_url: str) -> dict:
@@ -41,8 +41,9 @@ def gdal_info(s3_key: str, s3_url: str) -> dict:
     return gdal.Info(url, format='json')
 
 
-def create_stac_item(s3_key: str, s3_url: str, gdal_info_output: dict, dem_s3_url) -> dict:
+def create_stac_item(s3_key: str, s3_url: str, gdal_info_output: dict) -> dict:
     item_id = PurePath(s3_key).stem
+    dem_s3_url = get_dem_s3_url(s3_key)
     item_geometry = gdal_info_output['wgs84Extent']
     return {
         'type': 'Feature',
