@@ -65,10 +65,11 @@ def create_stac_item(s3_key: str, s3_url: str, gdal_info_output: dict, dem_s3_ur
         'collection': COLLECTION_ID,
         'links': [
             {
-            'href': dem_s3_url,
-            'type': 'image/tiff; application=geotiff',
-            'title': 'GLO-30 Public Copernicus Digital Elevation Model GeoTIFF used as input to create this HAND GeoTIFF',
-            'rel': 'related',
+                'href': dem_s3_url,
+                'type': 'image/tiff; application=geotiff',
+                'title': 'GLO-30 Public Copernicus Digital Elevation Model GeoTIFF'
+                         ' used as input to create this HAND GeoTIFF',
+                'rel': 'related',
             },
         ],
     }
