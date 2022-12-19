@@ -7,7 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.3.2]
 ### Added
-- Add the link of the Copernicus DEM file to the STAC item.
+- Added a "related" link to the associated Copernicus DEM tile for every HAND item
+
 ## [0.3.1]
 ### Security
 - Removed Transaction endpoints from the publicly available API, though create/update/delete permissions were already
