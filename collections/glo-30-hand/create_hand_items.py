@@ -30,10 +30,9 @@ def write_stac_items(s3_keys: list[str], s3_url: str, output_file: Path) -> None
             f.write(asf_stac_util.jsonify_stac_item(stac_item) + '\n')
 
 
-def get_dem_s3_url(s3_key: str) -> str:
-    # get the dem_s3_url for DEM file
-    dem_prefix = PurePath(s3_key).stem.replace("HAND", "DEM")
-    return f"https://copernicus-dem-30m.s3.eu-central-1.amazonaws.com/{dem_prefix}/{dem_prefix}.tif"
+def get_dem_url(hand_item_id: str) -> str:
+    dem_id = hand_item_id.replace('HAND', 'DEM')
+    return f'https://copernicus-dem-30m.s3.eu-central-1.amazonaws.com/{dem_id}/{dem_id}.tif'
 
 
 def gdal_info(s3_key: str, s3_url: str) -> dict:
@@ -43,7 +42,6 @@ def gdal_info(s3_key: str, s3_url: str) -> dict:
 
 def create_stac_item(s3_key: str, s3_url: str, gdal_info_output: dict) -> dict:
     item_id = PurePath(s3_key).stem
-    dem_s3_url = get_dem_s3_url(s3_key)
     item_geometry = gdal_info_output['wgs84Extent']
     return {
         'type': 'Feature',
@@ -59,14 +57,14 @@ def create_stac_item(s3_key: str, s3_url: str, gdal_info_output: dict) -> dict:
             'data': {
                 'href': urllib.parse.urljoin(s3_url, s3_key),
                 'type': 'image/tiff; application=geotiff',
-                },
             },
+        },
         'bbox': geometry.shape(item_geometry).bounds,
         'stac_extensions': [],
         'collection': COLLECTION_ID,
         'links': [
             {
-                'href': dem_s3_url,
+                'href': get_dem_url(item_id),
                 'type': 'image/tiff; application=geotiff',
                 'title': 'GLO-30 Public Copernicus Digital Elevation Model GeoTIFF'
                          ' used as input to create this HAND GeoTIFF',
