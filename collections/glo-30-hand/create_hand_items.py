@@ -1,5 +1,6 @@
 import argparse
 import urllib.parse
+from datetime import datetime, timezone
 from pathlib import Path, PurePath
 
 import asf_stac_util
@@ -29,6 +30,11 @@ def write_stac_items(s3_keys: list[str], s3_url: str, output_file: Path) -> None
             f.write(asf_stac_util.jsonify_stac_item(stac_item) + '\n')
 
 
+def get_dem_url(hand_item_id: str) -> str:
+    dem_id = hand_item_id.replace('HAND', 'DEM')
+    return f'https://copernicus-dem-30m.s3.eu-central-1.amazonaws.com/{dem_id}/{dem_id}.tif'
+
+
 def gdal_info(s3_key: str, s3_url: str) -> dict:
     url = f'/vsicurl/{urllib.parse.urljoin(s3_url, s3_key)}'
     return gdal.Info(url, format='json')
@@ -43,6 +49,8 @@ def create_stac_item(s3_key: str, s3_url: str, gdal_info_output: dict) -> dict:
         'id': item_id,
         'properties': {
             'datetime': None,
+            'start_datetime': datetime(2010, 12, 1, tzinfo=timezone.utc),
+            'end_datetime': datetime(2015, 2, 1, tzinfo=timezone.utc),
         },
         'geometry': item_geometry,
         'assets': {
@@ -54,6 +62,15 @@ def create_stac_item(s3_key: str, s3_url: str, gdal_info_output: dict) -> dict:
         'bbox': geometry.shape(item_geometry).bounds,
         'stac_extensions': [],
         'collection': COLLECTION_ID,
+        'links': [
+            {
+                'href': get_dem_url(item_id),
+                'type': 'image/tiff; application=geotiff',
+                'title': 'GLO-30 Public Copernicus Digital Elevation Model GeoTIFF'
+                         ' used as input to create this HAND GeoTIFF',
+                'rel': 'related',
+            },
+        ],
     }
 
 
