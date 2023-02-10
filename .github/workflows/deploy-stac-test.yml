@@ -5,6 +5,8 @@ on:
     branches:
       - develop
 
+concurrency: deploy-stac-test
+
 jobs:
   deploy-stac-api:
     runs-on: ubuntu-latest
