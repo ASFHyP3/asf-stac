@@ -5,6 +5,8 @@ on:
     branches:
       - main
 
+concurrency: deploy-stac-prod
+
 jobs:
   deploy-stac-api:
     runs-on: ubuntu-latest
