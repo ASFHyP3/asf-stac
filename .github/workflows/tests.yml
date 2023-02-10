@@ -16,12 +16,11 @@ jobs:
         # Edit environment.yml to specify the absolute path for requirements.txt TODO why?
         run: sed -i "s_requirements.txt_${PWD}/requirements.txt_" environment.yml
 
-      - uses: conda-incubator/setup-miniconda@v2
+      - uses: mamba-org/provision-with-micromamba@v14
         with:
-          mamba-version: '*'
-          python-version: '3.9'
-          activate-environment: asf-stac
           environment-file: environment.yml
+          extra-specs: |
+            python=3.9
 
       - name: run pytest
         run: make test
