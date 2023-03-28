@@ -2,7 +2,7 @@
 -r requirements-run-codebuild.txt
 ./lib/asf-stac-util/
 boto3==1.26.91
-cfn-lint==0.74.2
+cfn-lint==0.76.1
 flake8==6.0.0
 pypgstac[psycopg]==0.6.13
 pystac==1.7.0
