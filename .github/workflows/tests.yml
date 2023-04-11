@@ -12,12 +12,16 @@ jobs:
     steps:
       - uses: actions/checkout@v3.1.0
 
-      - uses: conda-incubator/setup-miniconda@v2
+      - name: edit environment.yml
+        # Edit environment.yml to specify the absolute path for requirements.txt as a workaround for
+        # https://github.com/mamba-org/provision-with-micromamba/issues/108
+        run: sed -i "s_requirements.txt_${PWD}/requirements.txt_" environment.yml
+
+      - uses: mamba-org/provision-with-micromamba@v15
         with:
-          mamba-version: '*'
-          python-version: '3.9'
-          activate-environment: asf-stac
           environment-file: environment.yml
+          extra-specs: |
+            python=3.9
 
       - name: run pytest
         run: make test

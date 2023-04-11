@@ -5,6 +5,8 @@ on:
     branches:
       - main
 
+concurrency: deploy-stac-prod
+
 jobs:
   deploy-stac-api:
     runs-on: ubuntu-latest
@@ -29,6 +31,6 @@ jobs:
 
   call-bump-version-workflow:
     needs: deploy-stac-api
-    uses: ASFHyP3/actions/.github/workflows/reusable-bump-version.yml@v0.4.0
+    uses: ASFHyP3/actions/.github/workflows/reusable-bump-version.yml@v0.7.1
     secrets:
       USER_TOKEN: ${{ secrets.TOOLS_BOT_PAK }}
