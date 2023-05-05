@@ -7,7 +7,7 @@ flake8==6.0.0
 pypgstac[psycopg]==0.7.6
 pystac==1.7.3
 pytest==7.3.1
-requests==2.29.0
+requests==2.30.0
 shapely==2.0.1
 tqdm==4.65.0
 uvicorn==0.21.1
