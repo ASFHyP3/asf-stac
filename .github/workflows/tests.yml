@@ -17,7 +17,7 @@ jobs:
         # https://github.com/mamba-org/provision-with-micromamba/issues/108
         run: sed -i "s_requirements.txt_${PWD}/requirements.txt_" environment.yml
 
-      - uses: mamba-org/provision-with-micromamba@v15
+      - uses: mamba-org/provision-with-micromamba@v16
         with:
           environment-file: environment.yml
           extra-specs: |
