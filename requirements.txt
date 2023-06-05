@@ -1,7 +1,7 @@
 -r requirements-apps-api.txt
 -r requirements-run-codebuild.txt
 ./lib/asf-stac-util/
-boto3==1.26.124
+boto3==1.26.146
 cfn-lint==0.77.4
 flake8==6.0.0
 pypgstac[psycopg]==0.7.6
