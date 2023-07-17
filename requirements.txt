@@ -10,4 +10,4 @@ pytest==7.3.1
 requests==2.29.0
 shapely==2.0.1
 tqdm==4.65.0
-uvicorn==0.21.1
+uvicorn==0.23.0
