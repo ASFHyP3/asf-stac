@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.3.3]
 ### Changed
-- Updated GitHub actions to use `provision-with-micromamba` instead of `setup-miniconda`
+- Updated GitHub actions to use `setup-micromamba` instead of `setup-miniconda`
 - Version upgrades for python dependencies and `ASFHyP3/actions`
 
 ## [0.3.2]
