@@ -10,13 +10,10 @@ jobs:
         shell: bash -l {0}
 
     steps:
-      - uses: actions/checkout@v3.1.0
+      - uses: actions/checkout@v4
 
-      - uses: conda-incubator/setup-miniconda@v2
+      - uses: mamba-org/setup-micromamba@v1
         with:
-          mamba-version: '*'
-          python-version: '3.9'
-          activate-environment: asf-stac
           environment-file: environment.yml
 
       - name: run pytest
