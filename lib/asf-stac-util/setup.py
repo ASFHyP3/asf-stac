@@ -4,7 +4,7 @@ setup(
     name='asf-stac-util',
     license='BSD',
     include_package_data=True,
-    install_reqires=[],
+    install_requires=[],
     python_requires='~=3.9',
     packages=find_packages(),
 )
