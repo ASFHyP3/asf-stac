@@ -3,17 +3,18 @@
 # Please see the documentation for all configuration options:
 # https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
 
-version: 2
-updates:
-  - package-ecosystem: "pip"
-    directory: "/"
-    schedule:
-      interval: "daily"
-    labels:
-      - "bumpless"
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      interval: "daily"
-    labels:
-      - "bumpless"
+# TODO: uncomment these lines when https://github.com/ASFHyP3/asf-stac/issues/334 is resolved
+#version: 2
+#updates:
+#  - package-ecosystem: "pip"
+#    directory: "/"
+#    schedule:
+#      interval: "daily"
+#    labels:
+#      - "bumpless"
+#  - package-ecosystem: "github-actions"
+#    directory: "/"
+#    schedule:
+#      interval: "daily"
+#    labels:
+#      - "bumpless"
