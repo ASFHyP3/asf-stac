@@ -12,16 +12,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3.1.0
 
-      - name: edit environment.yml
-        # Edit environment.yml to specify the absolute path for requirements.txt as a workaround for
-        # https://github.com/mamba-org/provision-with-micromamba/issues/108
-        run: sed -i "s_requirements.txt_${PWD}/requirements.txt_" environment.yml
-
-      - uses: mamba-org/provision-with-micromamba@v15
+      - uses: mamba-org/setup-micromamba@v1
         with:
           environment-file: environment.yml
-          extra-specs: |
-            python=3.9
 
       - name: run pytest
         run: make test
