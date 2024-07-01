@@ -1,5 +1,5 @@
 mangum==0.17.0
 stac-fastapi.api==2.4.9
 stac-fastapi.extensions==2.4.9
-stac-fastapi.pgstac==2.4.10
+stac-fastapi.pgstac==2.5.0
 stac-fastapi.types==2.4.9
