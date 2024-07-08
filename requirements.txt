@@ -8,6 +8,6 @@ pypgstac[psycopg]==0.7.10
 pystac==1.9.0
 pytest==8.2.2
 requests==2.32.3
-shapely==2.0.2
+shapely==2.0.4
 tqdm==4.66.4
 uvicorn==0.30.1
