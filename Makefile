@@ -64,4 +64,6 @@ flake8:
 	flake8 --max-line-length=120
 
 cfn-lint:
-	cfn-lint --template `find . -name cloudformation.yml` --info --ignore-checks W3002
+	# Ignore "W1011 Use dynamic references over parameters for secrets" because we store secrets
+	# using GitHub Secrets. See https://github.com/aws-cloudformation/cfn-lint/blob/main/docs/rules.md
+	cfn-lint --template `find . -name cloudformation.yml` --info --ignore-checks W3002 W1011
