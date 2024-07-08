@@ -48,11 +48,6 @@ Resources:
       VPCSecurityGroups:
         - !Ref DatabaseSecurityGroup
       Engine: postgres
-      # RDS may automatically apply minor version upgrades to the deployed database instance,
-      # in which case the version specified here will fall behind what is deployed in AWS.
-      # Eventually, cfn-lint may complain that the version shown here is invalid,
-      # in which case we should update the version shown here to match what is shown in the
-      # AWS RDS console for our database instance.
       EngineVersion: '14.10'
       MasterUsername: postgres
       MasterUserPassword: !Ref DatabaseAdminPassword

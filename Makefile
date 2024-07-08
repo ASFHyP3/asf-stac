@@ -65,5 +65,11 @@ flake8:
 
 cfn-lint:
 	# Ignore "W1011 Use dynamic references over parameters for secrets" because we store secrets
-	# using GitHub Secrets. See https://github.com/aws-cloudformation/cfn-lint/blob/main/docs/rules.md
-	cfn-lint --template `find . -name cloudformation.yml` --info --ignore-checks W3002 W1011
+	# using GitHub Secrets.
+	#
+	# Ignore E3691 for validating the database instance engine and version, because RDS automatically
+	# applies minor version upgrades to keep the deployed database instance up-to-date, so we do not
+	# need to keep the engine version specified in the CloudFormation template up-to-date.
+	#
+	# See https://github.com/aws-cloudformation/cfn-lint/blob/main/docs/rules.md
+	cfn-lint --template `find . -name cloudformation.yml` --info --ignore-checks W3002 W1011 E3691
