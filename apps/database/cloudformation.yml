@@ -48,7 +48,7 @@ Resources:
       VPCSecurityGroups:
         - !Ref DatabaseSecurityGroup
       Engine: postgres
-      EngineVersion: '14.4'
+      EngineVersion: '14.10'
       MasterUsername: postgres
       MasterUserPassword: !Ref DatabaseAdminPassword
       Port: '5432'
