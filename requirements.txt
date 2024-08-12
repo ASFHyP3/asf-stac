@@ -2,7 +2,7 @@
 -r requirements-run-codebuild.txt
 ./lib/asf-stac-util/
 boto3==1.34.149
-cfn-lint==1.8.2
+cfn-lint==1.9.7
 flake8==7.1.1
 
 # Installs the extra psycopg dependencies, but leaves the version unspecified,
