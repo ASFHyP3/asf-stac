@@ -4,12 +4,7 @@
 boto3==1.34.149
 cfn-lint==1.9.7
 flake8==7.1.1
-
-# Installs the extra psycopg dependencies, but leaves the version unspecified,
-# so that the version of pypgstac required by stac-fastapi.pgstac (in requirements-apps-api.txt)
-# will be installed.
-pypgstac[psycopg]
-
+pypgstac[psycopg]==0.7.10
 pystac==1.10.1
 pytest==8.3.2
 requests==2.32.3
