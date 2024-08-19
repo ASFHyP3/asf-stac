@@ -1,2 +1,2 @@
 mangum==0.17.0
-stac-fastapi.pgstac==2.5.0
+stac-fastapi.pgstac==3.0.0
