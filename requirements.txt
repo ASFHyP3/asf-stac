@@ -9,5 +9,5 @@ pystac==1.10.1
 pytest==8.3.3
 requests==2.32.3
 shapely==2.0.6
-tqdm==4.66.6
+tqdm==4.67.0
 uvicorn==0.32.0
