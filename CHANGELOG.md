@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.6]
+### Changed
+- The [`static-analysis`](.github/workflows/static-analysis.yml) Github Actions workflow now uses `ruff` rather than `flake8` for linting.
+
 ## [0.3.5]
 ### Changed
 - Dependency upgrades.
@@ -11,7 +15,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.3.4]
 ### Changed
 - HAND license changed to CC0 from CCBy 4.0 in `collections/glo-30-hand/glo-30-hand.json` to match NASA data publishing guidelines.
-
 
 ## [0.3.3]
 ### Changed
