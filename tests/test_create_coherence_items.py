@@ -1,9 +1,8 @@
 from datetime import datetime, timedelta, timezone
 
-from shapely import geometry
-
 import create_coherence_items
 from create_coherence_items import SEASONS
+from shapely import geometry
 
 
 def test_season_datetime_averages():
