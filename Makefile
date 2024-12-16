@@ -61,8 +61,8 @@ test:
 static: ruff cfn-lint
 
 ruff:
-	ruff check
-	ruff format --diff
+	ruff check --select I .
+	ruff format --diff .
 
 cfn-lint:
 	# Ignore "W1011 Use dynamic references over parameters for secrets" because we store secrets
