@@ -58,11 +58,6 @@ run-api:
 test:
 	PYTHONPATH=${PWD}/collections/sentinel-1-global-coherence/:${PWD}/collections/glo-30-hand/ python -m pytest tests/
 
-static: flake8 cfn-lint
-
-flake8:
-	flake8 --max-line-length=120
-
 cfn-lint:
 	# Ignore "W1011 Use dynamic references over parameters for secrets" because we store secrets
 	# using GitHub Secrets.
