@@ -8,6 +8,7 @@ import boto3
 from osgeo import gdal
 from shapely import geometry
 
+
 gdal.SetConfigOption('GDAL_DISABLE_READDIR_ON_OPEN', 'EMPTY_DIR')
 
 s3 = boto3.client('s3')

@@ -8,6 +8,7 @@ import asf_stac_util
 import boto3
 from shapely import geometry
 
+
 s3 = boto3.client('s3')
 
 # TODO verify the start and end datetime values for each season

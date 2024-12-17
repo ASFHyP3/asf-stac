@@ -1,5 +1,6 @@
 import os
 
+
 os.environ['ENABLED_EXTENSIONS'] = ','.join(
     [
         'query',
