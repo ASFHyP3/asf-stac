@@ -3,10 +3,11 @@ import urllib.parse
 from datetime import datetime, timezone
 from pathlib import Path, PurePath
 
-import asf_stac_util
 import boto3
 from osgeo import gdal
 from shapely import geometry
+
+import asf_stac_util
 
 
 gdal.SetConfigOption('GDAL_DISABLE_READDIR_ON_OPEN', 'EMPTY_DIR')

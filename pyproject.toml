@@ -1,23 +1,35 @@
-line-length = 120
-src = ["src", "tests"]
+[project]
+requires-python = "==3.9"
 
-[format]
+[tool.ruff]
+line-length = 120
+# The directories to consider when resolving first- vs. third-party imports.
+# See: https://docs.astral.sh/ruff/settings/#src
+src = [
+    "**/src",
+    "lib/*",
+    "tests",
+]
+
+[tool.ruff.format]
 indent-style = "space"
 quote-style = "single"
 
-[lint]
+[tool.ruff.lint]
 extend-select = [
     "I",   # isort: https://docs.astral.sh/ruff/rules/#isort-i
     "UP",  # pyupgrade: https://docs.astral.sh/ruff/rules/#pyupgrade-up
+
     # TODO: Uncomment the following extensions and address their warnings:
     # "D",   # pydocstyle: https://docs.astral.sh/ruff/rules/#pydocstyle-d
     # "ANN", # annotations: https://docs.astral.sh/ruff/rules/#flake8-annotations-ann
+
     "PTH", # use-pathlib-pth: https://docs.astral.sh/ruff/rules/#flake8-use-pathlib-pth
 ]
 
-[lint.pydocstyle]
+[tool.ruff.lint.pydocstyle]
 convention = "google"
 
-[lint.isort]
+[tool.ruff.lint.isort]
 case-sensitive = true
 lines-after-imports = 2

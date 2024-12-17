@@ -4,9 +4,10 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path, PurePath
 
-import asf_stac_util
 import boto3
 from shapely import geometry
+
+import asf_stac_util
 
 
 s3 = boto3.client('s3')
