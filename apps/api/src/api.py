@@ -7,7 +7,6 @@ os.environ['ENABLED_EXTENSIONS'] = ','.join(
         'sort',
         'fields',
         'pagination',
-        'context',
     ]
 )
 
