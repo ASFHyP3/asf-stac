@@ -2,6 +2,7 @@ import argparse
 import json
 from pathlib import Path
 
+
 parser = argparse.ArgumentParser()
 parser.add_argument('--output-file', type=Path, default='collections.ndjson')
 parser.add_argument('collections', type=Path, nargs='+')
