@@ -7,7 +7,7 @@ ruff==0.11.4
 mypy==1.14.1
 pypgstac[psycopg]==0.8.6
 pystac==1.10.1
-pytest==8.3.4
+pytest==8.3.5
 requests==2.32.3
 shapely==2.0.7
 tqdm==4.67.1
