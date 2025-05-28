@@ -2,7 +2,7 @@
 -r requirements-run-codebuild.txt
 ./lib/asf-stac-util/
 boto3==1.38.23
-cfn-lint==1.35.1
+cfn-lint==1.35.3
 ruff==0.11.10
 mypy==1.14.1
 pypgstac[psycopg]==0.8.6
