@@ -77,7 +77,7 @@ def write_stac_items(s3_keys: list[str], s3_url: str, output_file: Path) -> None
 
 def create_stac_item(s3_key: str, s3_url: str) -> dict:
     metadata = parse_s3_key(s3_key)
-    item = {
+    item: dict = {
         'type': 'Feature',
         'stac_version': '1.0.0',
         'id': metadata.id,
