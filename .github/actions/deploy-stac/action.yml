@@ -35,7 +35,7 @@ runs:
         aws-region: us-west-2
     - uses: actions/setup-python@v4
       with:
-        python-version: 3.12
+        python-version: 3.11
     - name: Install Lambda dependencies
       shell: bash
       run: make -s install-lambda-deps

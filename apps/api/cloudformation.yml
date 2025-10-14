@@ -38,7 +38,7 @@ Resources:
       Handler: api.handler
       MemorySize: 2000
       Role: !GetAtt LambdaRole.Arn
-      Runtime: python3.12
+      Runtime: python3.11
       Timeout: 30
       VpcConfig:
         SecurityGroupIds:
