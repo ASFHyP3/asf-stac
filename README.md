@@ -1,5 +1,10 @@
 # asf-stac
 
+> [!WARNING]
+> **This repository has been permanently archived.**
+>
+> This repository has been superseeded by <https://github.com/ASFHyP3/asf-stac-duckdb> which uses a DuckDB backend instead of a PostgreSQL backend to host STAC collections from a GeoParquet file.
+
 Creation and hosting of STAC catalogs by the ASF Tools team.
 
 **Production API:** <https://stac.asf.alaska.edu>
